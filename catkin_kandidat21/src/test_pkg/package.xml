@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>reactive_grasping_kandidat21</name>
+  <name>test_pkg</name>
   <version>0.0.0</version>
-  <description>reactive_grasping_kandidat21 package</description>
+  <description>test_pkg package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
