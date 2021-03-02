@@ -1,7 +1,7 @@
 Hur man testar så att repot fungerar på egen dator:
 
 1. Öppna en terminal i linux (ctr+alt+T)
-2. Navigera till där repot är nedladdat och gå in i catkin_kandidat
+2. Navigera till där repot är nedladdat och gå in i catkin_kandidat mappen
 3. I terminalen, skriv: catkin_make
 4. I terminalen, skriv: source devel/setup.bashrc
 5. I terminalen, skriv: roscore
