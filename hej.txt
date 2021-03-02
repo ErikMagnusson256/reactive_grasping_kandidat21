@@ -1,1 +1,4 @@
 ny fil och ny text 1
+
+nu lägger jag ny text eller ändrar i kod.
+
