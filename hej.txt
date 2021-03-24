@@ -2,6 +2,8 @@ ny fil och ny text 1
 
 nu lägger jag ny text eller ändrar i kod.
 
-main branchat in en ny feature som filippa har gjort. 
+main branchat in en ny feature som filippa har gjort.
+
+henrik testar ha_0.04_rad_translate
 
 
