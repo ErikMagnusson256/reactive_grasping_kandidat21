@@ -11,7 +11,7 @@ import time
 import math
 
 globa_msg = '[proximity_value_R=500,proximity_value_L=550]'
-tolerance = 100
+tolerance =15
 
 
 # Decodes the data that has been retrived from registers
