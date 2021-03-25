@@ -2,16 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2ae17b58-c812-4eda-8f6f-ecf069756899" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/ROS.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/ROS.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/reactive_grasping_kandidat21.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/reactive_grasping_kandidat21.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/gripperInterface.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/gripperInterface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/mainController.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/mainController.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/proximityCalc.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/proximityCalc.py" afterDir="false" />
     </list>
-    <list id="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" name="Changes by macbook" comment="">
-      <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/proximityCalc.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/proximityCalc.py" afterDir="false" />
-    </list>
+    <list id="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" name="Changes by macbook" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,15 +22,6 @@
       <filtered-out-file-type name="TAG" />
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
-  </component>
-  <component name="LineStatusTrackerManager">
-    <file path="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/proximityCalc.py">
-      <ranges>
-        <range start1="0" end1="1" start2="0" end2="14" changelist="2ae17b58-c812-4eda-8f6f-ecf069756899" />
-        <range start1="2" end1="2" start2="15" end2="52" changelist="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" />
-        <range start1="3" end1="4" start2="53" end2="57" changelist="2ae17b58-c812-4eda-8f6f-ecf069756899" />
-      </ranges>
-    </file>
   </component>
   <component name="ProjectId" id="1phVLUVy2tceoJ6T2e6s2WfkCvf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />

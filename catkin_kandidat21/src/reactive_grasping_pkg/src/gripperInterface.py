@@ -65,8 +65,8 @@ class Rg2ftModbusROSInterface:
 
     # Get data from registers regarding proximity and publishes on topic as a string
     def get_proximity_registers(self):
-        prox_val_L = validator_int16(self.client.read_holding_registers(self.proximity_value_L_addr, 1, unit=self.rg2ft_device_addr))
-        prox_val_R = validator_int16(self.client.read_holding_registers(self.proximity_value_R_addr, 1, unit=self.rg2ft_device_addr))
+        prox_val_L = (self.client.read_holding_registers(self.proximity_value_L_addr, 1, unit=self.rg2ft_device_addr))
+        prox_val_R = (self.client.read_holding_registers(self.proximity_value_R_addr, 1, unit=self.rg2ft_device_addr))
 
         return '[proximity_value_R='+str(prox_val_R)+',proximity_value_L='+str(prox_val_L)+']'
 
@@ -74,12 +74,12 @@ class Rg2ftModbusROSInterface:
     def get_force_registers(self):
         # TODO add torque  readings later on
 
-        F_x_R = validator_int16(self.client.read_holding_registers(self.F_x_R_addr, 1, unit=self.rg2ft_device_addr))
-        F_y_R = validator_int16(self.client.read_holding_registers(self.F_y_R_addr, 1, unit=self.rg2ft_device_addr))
-        F_z_R = validator_int16(self.client.read_holding_registers(self.F_z_R_addr, 1, unit=self.rg2ft_device_addr))
-        F_x_L = validator_int16(self.client.read_holding_registers(self.F_x_L_addr, 1, unit=self.rg2ft_device_addr))
-        F_y_L = validator_int16(self.client.read_holding_registers(self.F_y_L_addr, 1, unit=self.rg2ft_device_addr))
-        F_z_L = validator_int16(self.client.read_holding_registers(self.F_z_L_addr, 1, unit=self.rg2ft_device_addr))
+        F_x_R = (self.client.read_holding_registers(self.F_x_R_addr, 1, unit=self.rg2ft_device_addr))
+        F_y_R = (self.client.read_holding_registers(self.F_y_R_addr, 1, unit=self.rg2ft_device_addr))
+        F_z_R = (self.client.read_holding_registers(self.F_z_R_addr, 1, unit=self.rg2ft_device_addr))
+        F_x_L = (self.client.read_holding_registers(self.F_x_L_addr, 1, unit=self.rg2ft_device_addr))
+        F_y_L = (self.client.read_holding_registers(self.F_y_L_addr, 1, unit=self.rg2ft_device_addr))
+        F_z_L = (self.client.read_holding_registers(self.F_z_L_addr, 1, unit=self.rg2ft_device_addr))
         return '[F_x_R=' + str(F_x_R) + ',F_y_R=' + str(F_y_R) + ',F_z_R=' + str(F_z_R) + ',F_x_L=' + str(F_x_L) + ',F_y_L=' + str(F_y_L) + ',F_z_L' + str(F_z_L)+']'
 
     # Get data from registers regarding misc information, eg: gripper status
