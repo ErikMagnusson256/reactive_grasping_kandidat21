@@ -8,6 +8,7 @@ import std_msgs.msg
 from std_msgs.msg import String
 import time
 import numpy as np
+import gripperInterface
 
 
 #remove this later
@@ -64,10 +65,13 @@ def get_F_z_L():
 def slip_detect():
     if ((np.sqrt((get_F_x_L()**2)+(get_F_y_L()**2)) > (get_F_z_L())) * 0.5 or (np.sqrt((get_F_x_R()**2)+(get_F_y_R()**2)) > (get_F_z_R() * 0.5))):
         print('Caught me slipping')
-        #Caught me slipping
+        slip_react()
+        return True
     else:
-        print('All good')
+        return False, print('All good')
 
+def slip_react():
+    gripperInterface.operate_gripper_step_force(0.1)
 
 def main():
     rospy.init_node('topic_subscriber')
