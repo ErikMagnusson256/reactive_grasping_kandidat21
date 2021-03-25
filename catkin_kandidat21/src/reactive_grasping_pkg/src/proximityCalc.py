@@ -1,12 +1,33 @@
 #!/usr/bin/env python
 # TODO make custom msgs to avoid string splcing !!!!
 
+from pymodbus.client.sync import ModbusTcpClient as ModbusClient
+from pymodbus.constants import Endian
+from pymodbus.payload import BinaryPayloadDecoder
 import rospy
+import std_msgs.msg
 from std_msgs.msg import String
+import time
 import math
 
 globa_msg = '[proximity_value_R=500,proximity_value_L=550]'
 tolerance = 100
+
+
+# Decodes the data that has been retrived from registers
+def validator_int16(instance):
+    if not instance.isError():
+        '''.isError() implemented in pymodbus 1.4.0 and above.'''
+        decoder = BinaryPayloadDecoder.fromRegisters(
+            instance.registers,
+            byteorder=Endian.Big, wordorder=Endian.Little
+        )
+        return float('{0:.2f}'.format(decoder.decode_16bit_int()))
+
+    else:
+        # Error handling.
+        print("There isn't the registers, Try again.")
+        return None
 
 
 def prox_data_handler(msg):
@@ -16,7 +37,7 @@ def prox_data_handler(msg):
 # Get Proximity reading from left finger from gripperinterface publisher
 # read string and splice out relevant data.
 def get_prox_L():
-    proxL = int(globa_msg.split('=', 3)[2].split(']')[0])
+    proxL = validator_int16(globa_msg.split('=', 3)[2].split(']')[0])
 
     #return mainController.validator_16(proxL)
     return proxL
@@ -24,7 +45,7 @@ def get_prox_L():
 
 # Get proximity reading from right finger
 def get_prox_R():
-    proxR = int(globa_msg.split('=',3)[1].split(',')[0])
+    proxR = validator_int16(globa_msg.split('=',3)[1].split(',')[0])
     return proxR
   #  return mainController.validator_16(proxR)
 

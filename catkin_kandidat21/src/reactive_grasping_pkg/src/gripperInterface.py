@@ -10,6 +10,7 @@ from std_msgs.msg import String
 import time
 # TODO solve comments and description
 
+# @TODO Add proximity offsets when initing, double check that they have ben set
 
 #remove this later
 def validator_int16(instance):
@@ -113,7 +114,7 @@ class Rg2ftModbusROSInterface:
         if return_val:
             # init publishers
             rospy.init_node('topic_publisher')
-            self.pub_proximity = rospy.Publisher('/gripper_interface_proximity_data/', String, queue_size=1)
+            self.pub_proximity = rospy.Publisher('/gripper_interface/proximity_data/', String, queue_size=1)
             self.pub_force = rospy.Publisher('/gripper_interface/force_torque_data/', String, queue_size=1)
             self.pub_misc = rospy.Publisher('/gripper_interface/misc_data', String, queue_size=1)
 
