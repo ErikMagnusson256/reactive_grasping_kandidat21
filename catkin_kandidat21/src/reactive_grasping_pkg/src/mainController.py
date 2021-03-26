@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # TODO comments and bös
+import numpy
 
 import proximityCalc
 import armCalc
@@ -52,3 +53,17 @@ def stage_6():
 
 if __name__ == '__main__':
     None
+
+class MainController:
+
+    """constructor with printmessage for debugging"""
+    def __init__(self):
+        print('MainController constructor is called')
+
+    """method converts degree to radian"""
+    def degree_to_radian(self, degree):
+        return numpy.deg2rad(degree)
+
+    """method convert radian to degree"""
+    def radian_to_degree(self, radian):
+        return numpy.rad2deg(radian)
