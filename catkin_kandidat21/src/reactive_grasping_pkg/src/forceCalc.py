@@ -8,7 +8,7 @@ import std_msgs.msg
 from std_msgs.msg import String
 import time
 import numpy as np
-import gripperInterface
+from gripperInterface import Rg2ftModbusROSInterface as gripperInterface1
 
 
 #remove this later
@@ -71,7 +71,11 @@ def slip_detect():
         return False, print('All good')
 
 def slip_react():
-    gripperInterface.operate_gripper_step_force(0.1)
+    #gripperInterface1.operate_gripper_step_force(0.1)
+    pub = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+    # rospy.init_node('talkerdffdf', anonymous=True)
+    pub.publish('operate_gripper_step_force(1)')
+
 
 def main():
     rospy.init_node('topic_subscriber')
