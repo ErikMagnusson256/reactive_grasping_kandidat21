@@ -8,6 +8,7 @@ import rospy
 import std_msgs.msg
 from std_msgs.msg import String
 import time
+import matplotlib.pyplot as plt
 # TODO solve comments and description
 
 # @TODO Add proximity offsets when initing, double check that they have ben set
@@ -88,6 +89,57 @@ class Rg2ftModbusROSInterface:
     def get_miscellaneous_registers(self):
         None
 
+
+    def generate_graphs(self, mode, n_datapoints, delta_t):
+
+        if mode == 1:
+            #prox grapho
+            prox_data_R = []
+            prox_data_L = []
+            gripper_width_data = []
+
+            #TODO add offset globaly in gripperitnerface
+            offset_right = -(27)
+            offset_left = -(17)
+
+            self.client.write_register(self.target_width_addr, 400, unit=self.rg2ft_device_addr)
+            self.client.write_register(self.target_force_addr, 100, unit=self.rg2ft_device_addr)
+            self.client.write_register(self.control_addr, 1, unit=self.rg2ft_device_addr)
+
+            for i in range(n_datapoints):
+                prox_data_L.append(validator_int16(self.client.read_holding_registers(self.proximity_value_L_addr, 1, unit=self.rg2ft_device_addr))/10 + offset_left)
+                prox_data_R.append(validator_int16(self.client.read_holding_registers(self.proximity_value_R_addr, 1, unit=self.rg2ft_device_addr))/10 + offset_right)
+                gripper_width_data.append(validator_int16(self.client.read_holding_registers(self.gripper_width_addr, 1, unit=self.rg2ft_device_addr))/10)
+
+
+                time.sleep(delta_t) #10ms
+
+            x = [a for a in range(n_datapoints)]
+            plt.plot(x, prox_data_L)
+            plt.plot(x, prox_data_R)
+            plt.plot(x, gripper_width_data)
+            plt.legend(['prox_L','prox_R','gripper_width'])
+            plt.yticks(np.arange(0, 100, 2), fontsize=8)
+            x_lab = 'x - delta time between datapoints: '+str(delta_t) + ' s'
+            plt.xlabel(x_lab)
+            plt.ylabel('[mm]')
+            #plt.xticks(np.arrange(0,n_datapoints, 50))
+
+            print('pringitng average prox l:', np.average(prox_data_L))
+            print('pringitng average prox R:', np.average(prox_data_R))
+            plt.show()
+
+
+
+
+        elif mode == 2:
+            #force/torque graph
+            None
+        else:
+            print('no mode selected')
+
+
+
     # while loop, continously reading data and publishes those on certain topics
     def run(self):
 
@@ -147,7 +199,7 @@ class Rg2ftModbusROSInterface:
 
 
     def operate_gripper_step_width(self, increment_width_mm):
-        current_width = self.client.read_registers(self.)
+       None
 
     def operate_gripper_step_force(self, increment_force_Nm):
         None
@@ -165,7 +217,7 @@ class Rg2ftModbusROSInterface:
         self.client.write_register(self.target_width_addr, grip_width_mm*10, unit=self.rg2ft_device_addr)
         self.client.write_register(self.target_force_addr, grip_force_Nm*10, unit=self.rg2ft_device_addr)
 
-        # 3 execute gripper command
+        # 3 execute gripper commandprint('Command recived from topic /gripper_interface/gripper_cmd, executing operate_gripper_step_(...)')
         self.client.write_register(self.control_addr, 1, unit=self.rg2ft_device_addr)
 
         # 4 wait for gripper to not be busy
@@ -186,8 +238,8 @@ class Rg2ftModbusROSInterface:
             self.pub_proximity = rospy.Publisher('/gripper_interface/proximity_data/', String, queue_size=1)
             self.pub_force = rospy.Publisher('/gripper_interface/force_torque_data/', String, queue_size=1)
             self.pub_misc = rospy.Publisher('/gripper_interface/misc_data', String, queue_size=1)
-            rospy.init_node('topic_subscriber')
-            self.sub_gripper_cmd('gripper_interface/gripper_cmd/', self.gripper_cmd_handler)
+          #  rospy.init_node('topic_subscriber')
+           # self.sub_gripper_cmd('gripper_interface/gripper_cmd/', self.gripper_cmd_handler)
             publishing_rate_Hz = rospy.Rate(1)
 
             # init service???
@@ -195,13 +247,9 @@ class Rg2ftModbusROSInterface:
             print("Catastrophic error please check yo self!!")
 
 if __name__ == '__main__':
-    cmd_string = 'operate_gripper(50,60)'
-    width = int(cmd_string.split('(')[1].split(',')[0])
-    force = int(cmd_string.split(',')[1].split(')')[0])
-    print('widthhh:',width)
-    print('forceee:',force)
 
-    #C = Rg2ftModbusROSInterface()
+    C = Rg2ftModbusROSInterface()
+    C.generate_graphs(1, 200, 0.005)
     #C.run()
 
 
