@@ -142,15 +142,40 @@ class Rg2ftModbusROSInterface:
         else:
             print("Unknown command recived on /gripper_interface/gripper_cmd/ :", cmd_string)
 
+    # creating global variables that can be set to save previous command, to be used to "step" force or width
+    current_width = 0
+    current_force = 0
+
 
     def operate_gripper_step_width(self, increment_width_mm):
-        current_width = self.client.read_registers(self.)
+        current_width = get_current_width()
+        current_force = get_current_force()
+        if operate_gripper((current_width + increment_width_mm), current_force):
+            return True
+        else:
+            print('operate_gripper_step_width() failed')
+
 
     def operate_gripper_step_force(self, increment_force_Nm):
-        None
+        current_width = get_current_width()
+        current_force = get_current_force()
+        if operate_gripper(current_width, (current_force + increment_force_Nm)):
+            return True
+        else:
+            print('operate_gripper_step_force() failed')
 
     def opeate_grippper_release(self):
+        # should this just open gripper to max?
         None
+
+    def set_current_force(self, last_force_command):
+        global current_force
+        current_force = last_force_command
+
+    def get_current_force(self):
+        global current_force
+        return current_force
+
 
     #open/closes gripper to a certain width with a set force
     def operate_gripper(self,grip_width_mm, grip_force_Nm):
@@ -164,6 +189,10 @@ class Rg2ftModbusROSInterface:
 
         # 3 execute gripper command
         self.client.write_register(self.control_addr, 1, unit=self.rg2ft_device_addr)
+
+        # Save the variables passed
+        set_current_force(grip_force_Nm)
+        set_current_width(grip_width_mm)
 
         # 4 wait for gripper to not be busy
         while validator_int16(read_holding_registers(self.gripper_busy_addr, 1, unit=self.rg2ft_device_addr)) == 1:
