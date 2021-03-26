@@ -122,21 +122,24 @@ class Rg2ftModbusROSInterface:
         # check what type of cmd that has been sent, see function method to see examples of allowable
 
         if cmd_string.contains('operate_gripper('):
-            print('Command recived from topic /gripper_interface/gripper_cmd')
+            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string,': operating gripper executing')
             width = int(cmd_string.split('(')[1].split(',')[0])
             force = int(cmd_string.split(',')[1].split(')')[0])
             self.operate_gripper(width,force)
 
 
         elif cmd_string.contains('operate_gripper_step_width('):
+            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string, ': operating_gripper_step_width executing')
             step_width = cmd_string.split('(')[1].split(')')[0]
             self.operate_gripper_step_width(step_width)
 
         elif cmd_string.contains('operate_gripper_step_force('):
+            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string, ': operating_gripper_step_force executing')
             step_force = cmd_string.split('(')[1].split(')')[0]
             self.operate_gripper_step_force(step_force)
 
         elif cmd_string.contains('operate_gripper_release'):
+            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string, ': operate_gripper_release executing')
             self.opeate_grippper_release()
 
         else:
@@ -173,7 +176,6 @@ class Rg2ftModbusROSInterface:
         return True
 
     def __init__(self):
-
         box_ip = "192.168.1.1"  # OnRobot computebox IP address
         self.client = ModbusClient(box_ip, port=502)  # Creates a client in this program that uses the box ip and port 502 (as per standard for modbus)
         return_val = self.client.connect()  # Tries to connect to the computebox
