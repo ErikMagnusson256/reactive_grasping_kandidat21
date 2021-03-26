@@ -9,9 +9,10 @@ import std_msgs.msg
 from std_msgs.msg import String
 import time
 import math
+import gripperInterface
 
 globa_msg = '[proximity_value_R=500,proximity_value_L=550]'
-tolerance = 100
+tolerance =15
 
 
 # Decodes the data that has been retrived from registers
@@ -55,10 +56,13 @@ def prox_check():
     # Run gripping command from main? or just return a "good" status, start closing grippers and then run proxCheck()
     # again once fingers are closer to object? interesting if we could with this grip a moving object?
     if math.isclose(get_prox_L(), get_prox_R(), abs_tol=tolerance):
-        return print('Yay!') # ???
+        return True, print('Yay!') # ???
 
+    # If distance from finger L + tolerance is larger than the distance from finger R, this mean we need to move
+    # the arm in the direction of finger R. Standing on the "robots side", the finger marked as R is on the left,
+    # sooo this means we need to decide from what perspective we are counting from.
     elif (get_prox_L() - tolerance)> get_prox_R():
-        # Move gripper right by getProxL() - getProxR() mm? SLOWLY! send this to armCalc
+        # Move gripper towards finger R by tiny amount depending on Hz? SLOWLY! send this to armCalc
         None
 
     elif (get_prox_R() - tolerance) > get_prox_L():

@@ -3,10 +3,16 @@
   <component name="ChangeListManager">
     <list default="true" id="2ae17b58-c812-4eda-8f6f-ecf069756899" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/forceCalc.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/forceCalc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/gripperInterface.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/gripperInterface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/mainController.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/mainController.py" afterDir="false" />
+    </list>
+    <list id="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" name="Changes by macbook" comment="">
+      <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/armCalc.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/armCalc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/forceCalc.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/forceCalc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/mainController.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/mainController.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/proximityCalc.py" beforeDir="false" afterPath="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/proximityCalc.py" afterDir="false" />
     </list>
-    <list id="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" name="Changes by macbook" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,6 +28,25 @@
       <filtered-out-file-type name="TAG" />
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
+  </component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/mainController.py">
+      <ranges>
+        <range start1="4" end1="4" start2="4" end2="7" changelist="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" />
+        <range start1="8" end1="8" start2="11" end2="24" changelist="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" />
+        <range start1="9" end1="9" start2="25" end2="32" changelist="2ae17b58-c812-4eda-8f6f-ecf069756899" />
+        <range start1="10" end1="16" start2="33" end2="35" changelist="2ae17b58-c812-4eda-8f6f-ecf069756899" />
+        <range start1="17" end1="21" start2="36" end2="40" changelist="2ae17b58-c812-4eda-8f6f-ecf069756899" />
+        <range start1="22" end1="24" start2="41" end2="51" changelist="2ae17b58-c812-4eda-8f6f-ecf069756899" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/catkin_kandidat21/src/reactive_grasping_pkg/src/forceCalc.py">
+      <ranges>
+        <range start1="10" end1="10" start2="10" end2="11" changelist="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" />
+        <range start1="28" end1="86" start2="29" end2="29" changelist="2ae17b58-c812-4eda-8f6f-ecf069756899" />
+        <range start1="87" end1="87" start2="30" end2="91" changelist="fe2688a5-17e9-400e-a1fd-ee479c1b66b5" />
+      </ranges>
+    </file>
   </component>
   <component name="ProjectId" id="1phVLUVy2tceoJ6T2e6s2WfkCvf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
