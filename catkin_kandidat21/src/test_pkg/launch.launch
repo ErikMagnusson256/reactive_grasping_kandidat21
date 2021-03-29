@@ -1,4 +1,0 @@
-<launch>
-<node pkg="beginner_tutorials" type="publisher_test.py" name="chatter"> 
-</node>
-</launch>
