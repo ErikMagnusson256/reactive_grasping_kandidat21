@@ -129,14 +129,50 @@ class Rg2ftModbusROSInterface:
             print('pringitng average prox R:', np.average(prox_data_R))
             plt.show()
 
+    def generate_graphs_force(self, mode, n_datapoints, delta_t):
+
+            if mode == 1:
+                # prox grapho
+                force_data_R = []
+                force_data_L = []
+                #gripper_width_data = []
 
 
 
-        elif mode == 2:
+                for i in range(n_datapoints):
+                    force_data_L.append(validator_int16(
+                        self.client.read_holding_registers(self.F_z_L_addr, 1,
+                                                           unit=self.rg2ft_device_addr)) / 10 )
+                    force_data_R.append(validator_int16(
+                        self.client.read_holding_registers(self.F_z_R_addr, 1,
+                                                           unit=self.rg2ft_device_addr)) / 10 )
+                   # gripper_width_data.append(validator_int16(
+                  #      self.client.read_holding_registers(self.gripper_width_addr, 1,
+                    #                                       unit=self.rg2ft_device_addr)) / 10)
+
+                    time.sleep(delta_t)  # 10ms
+
+                x = [a for a in range(n_datapoints)]
+                plt.plot(x, force_data_L)
+                plt.plot(x, force_data_R)
+
+                plt.legend(['Force_L', 'Force_R'])
+                plt.yticks(np.arange(0, 100, 2), fontsize=8)
+                x_lab = 'x - delta time between datapoints: ' + str(delta_t) + ' s'
+                plt.xlabel(x_lab)
+                plt.ylabel('[mm]')
+                # plt.xticks(np.arrange(0,n_datapoints, 50))
+
+                print('pringitng average prox l:', np.average(force_data_L))
+                print('pringitng average prox R:', np.average(force_data_R))
+                plt.show()
+
+
+            elif mode == 2:
             #force/torque graph
-            None
-        else:
-            print('no mode selected')
+                None
+            else:
+                print('no mode selected')
 
 
 
@@ -249,7 +285,8 @@ class Rg2ftModbusROSInterface:
 if __name__ == '__main__':
 
     C = Rg2ftModbusROSInterface()
-    C.generate_graphs(1, 200, 0.005)
+    #C.generate_graphs(1, 200, 0.005)
+    C.generate_graphs_force(1, 100, 0.1)
     #C.run()
 
 
