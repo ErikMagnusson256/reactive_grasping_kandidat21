@@ -133,19 +133,31 @@ class Rg2ftModbusROSInterface:
 
             if mode == 1:
                 # prox grapho
-                force_data_R = []
-                force_data_L = []
+                force_data_R_x = []
+                force_data_L_x = []
+                force_data_R_y = []
+                force_data_L_y = []
+                force_data_R_z = []
+                force_data_L_z = []
                 #gripper_width_data = []
-
-
+                self.client.write_register(self.target_width_addr, 300, unit=self.rg2ft_device_addr)
+                self.client.write_register(self.target_force_addr, 30, unit=self.rg2ft_device_addr)
+                self.client.write_register(self.control_addr, 1, unit=self.rg2ft_device_addr)
 
                 for i in range(n_datapoints):
-                    force_data_L.append(validator_int16(
+                    force_data_L_z.append(abs(validator_int16(
                         self.client.read_holding_registers(self.F_z_L_addr, 1,
-                                                           unit=self.rg2ft_device_addr)) / 10 )
-                    force_data_R.append(validator_int16(
+                                                           unit=self.rg2ft_device_addr)) / 10 ))
+                    force_data_R_z.append(abs(validator_int16(
                         self.client.read_holding_registers(self.F_z_R_addr, 1,
-                                                           unit=self.rg2ft_device_addr)) / 10 )
+                                                           unit=self.rg2ft_device_addr)) / 10 ))
+
+                    force_data_L_x.append(abs(validator_int16(
+                        self.client.read_holding_registers(self.F_x_L_addr, 1,
+                                                           unit=self.rg2ft_device_addr)) / 10))
+                    force_data_R_x.append(abs(validator_int16(
+                        self.client.read_holding_registers(self.F_x_R_addr, 1,
+                                                           unit=self.rg2ft_device_addr)) / 10))
                    # gripper_width_data.append(validator_int16(
                   #      self.client.read_holding_registers(self.gripper_width_addr, 1,
                     #                                       unit=self.rg2ft_device_addr)) / 10)
@@ -153,18 +165,21 @@ class Rg2ftModbusROSInterface:
                     time.sleep(delta_t)  # 10ms
 
                 x = [a for a in range(n_datapoints)]
-                plt.plot(x, force_data_L)
-                plt.plot(x, force_data_R)
+                plt.plot(x, force_data_L_z)
+                plt.plot(x, force_data_R_z)
+
+                plt.plot(x, force_data_L_x)
+                plt.plot(x, force_data_R_x)
 
                 plt.legend(['Force_L', 'Force_R'])
-                plt.yticks(np.arange(0, 100, 2), fontsize=8)
+                plt.yticks(np.arange(0, 10, 1), fontsize=8)
                 x_lab = 'x - delta time between datapoints: ' + str(delta_t) + ' s'
                 plt.xlabel(x_lab)
                 plt.ylabel('[mm]')
-                # plt.xticks(np.arrange(0,n_datapoints, 50))
 
-                print('pringitng average prox l:', np.average(force_data_L))
-                print('pringitng average prox R:', np.average(force_data_R))
+
+                print('pringitng average prox l:', np.average(force_data_L_z))
+                print('pringitng average prox R:', np.average(force_data_R_z))
                 plt.show()
 
 
@@ -286,7 +301,7 @@ if __name__ == '__main__':
 
     C = Rg2ftModbusROSInterface()
     #C.generate_graphs(1, 200, 0.005)
-    C.generate_graphs_force(1, 100, 0.1)
+    C.generate_graphs_force(1, 50, 0.1)
     #C.run()
 
 
