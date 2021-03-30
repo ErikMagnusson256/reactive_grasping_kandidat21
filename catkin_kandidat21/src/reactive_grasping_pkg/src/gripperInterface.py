@@ -140,24 +140,34 @@ class Rg2ftModbusROSInterface:
                 force_data_R_z = []
                 force_data_L_z = []
                 #gripper_width_data = []
+                force=400
+
                 self.client.write_register(self.target_width_addr, 300, unit=self.rg2ft_device_addr)
-                self.client.write_register(self.target_force_addr, 30, unit=self.rg2ft_device_addr)
+                self.client.write_register(self.target_force_addr, force, unit=self.rg2ft_device_addr)
                 self.client.write_register(self.control_addr, 1, unit=self.rg2ft_device_addr)
 
                 for i in range(n_datapoints):
-                    force_data_L_z.append(abs(validator_int16(
-                        self.client.read_holding_registers(self.F_z_L_addr, 1,
+                    force_data_L_x.append((validator_int16(
+                        self.client.read_holding_registers(self.F_x_L_addr, 1,
                                                            unit=self.rg2ft_device_addr)) / 10 ))
-                    force_data_R_z.append(abs(validator_int16(
-                        self.client.read_holding_registers(self.F_z_R_addr, 1,
+                    force_data_R_x.append((validator_int16(
+                        self.client.read_holding_registers(self.F_x_R_addr, 1,
                                                            unit=self.rg2ft_device_addr)) / 10 ))
 
-                    force_data_L_x.append(abs(validator_int16(
-                        self.client.read_holding_registers(self.F_x_L_addr, 1,
+                    force_data_L_y.append(abs(validator_int16(
+                        self.client.read_holding_registers(self.F_y_L_addr, 1,
                                                            unit=self.rg2ft_device_addr)) / 10))
-                    force_data_R_x.append(abs(validator_int16(
-                        self.client.read_holding_registers(self.F_x_R_addr, 1,
+                    force_data_R_y.append(abs(validator_int16(
+                        self.client.read_holding_registers(self.F_y_R_addr, 1,
                                                            unit=self.rg2ft_device_addr)) / 10))
+
+                    force_data_L_z.append(abs(validator_int16(
+                        self.client.read_holding_registers(self.F_z_L_addr, 1,
+                                                           unit=self.rg2ft_device_addr)) / 10))
+                    force_data_R_z.append(abs(validator_int16(
+                        self.client.read_holding_registers(self.F_z_R_addr, 1,
+                                                           unit=self.rg2ft_device_addr)) / 10))
+
                    # gripper_width_data.append(validator_int16(
                   #      self.client.read_holding_registers(self.gripper_width_addr, 1,
                     #                                       unit=self.rg2ft_device_addr)) / 10)
@@ -165,21 +175,37 @@ class Rg2ftModbusROSInterface:
                     time.sleep(delta_t)  # 10ms
 
                 x = [a for a in range(n_datapoints)]
-                plt.plot(x, force_data_L_z)
-                plt.plot(x, force_data_R_z)
 
                 plt.plot(x, force_data_L_x)
                 plt.plot(x, force_data_R_x)
 
-                plt.legend(['Force_L', 'Force_R'])
-                plt.yticks(np.arange(0, 10, 1), fontsize=8)
+                plt.plot(x, force_data_L_y)
+                plt.plot(x, force_data_R_y)
+
+                plt.plot(x, force_data_L_z)
+                plt.plot(x, force_data_R_z)
+
+                average_z_L = np.average(force_data_L_z)
+                average_z_R = np.average(force_data_R_z)
+                average_x_L = np.average(force_data_L_x)
+                average_x_R = np.average(force_data_R_x)
+                average_y_L = np.average(force_data_L_y)
+                average_y_R = np.average(force_data_R_y)
+
+                plt.legend(['Force_x_L: ' +str(round(average_x_L,4)), 'Force_x_R: '+str(round(average_x_R,4)),
+                            'Force_y_L: ' + str(round(average_y_L, 4)), 'Force_y_R: ' + str(round(average_y_R, 4)),
+                            'Force_z_L: ' + str(round(average_z_L, 4)), 'Force_y_R: ' + str(round(average_z_R, 4))])
+
+                plt.yticks(np.arange(-12, 33, 2), fontsize=8)
                 x_lab = 'x - delta time between datapoints: ' + str(delta_t) + ' s'
                 plt.xlabel(x_lab)
-                plt.ylabel('[mm]')
+                plt.ylabel('[Newton]')
 
 
-                print('pringitng average prox l:', np.average(force_data_L_z))
-                print('pringitng average prox R:', np.average(force_data_R_z))
+                # plt.plot(average_z_R,'--')
+                # plt.plot(average_z_L, '--')
+                # print('pringitng average l:', average_z_L)
+                # print('pringitng average R:', average_z_R)
                 plt.show()
 
 
@@ -301,7 +327,7 @@ if __name__ == '__main__':
 
     C = Rg2ftModbusROSInterface()
     #C.generate_graphs(1, 200, 0.005)
-    C.generate_graphs_force(1, 50, 0.1)
+    C.generate_graphs_force(1, 100, 0.01)
     #C.run()
 
 
