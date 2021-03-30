@@ -29,19 +29,20 @@ def stage_test():
         else:
             time.sleep(0.1)
 
-    forceLogic = ForceCalcClass()
-    proximityLogic = proximityCalc.ProximityCalcClass()
+    while not rospy.is_shutdown():
+        forceLogic = ForceCalcClass()
+        proximityLogic = proximityCalc.ProximityCalcClass()
 
-    while not proximityLogic.prox_check():
-        time.sleep(0.5)
-        proximityLogic.prox_check()
+        while not proximityLogic.prox_check():
+            time.sleep(0.5)
+            proximityLogic.prox_check()
 
-    #if gripperInterface2.operate_gripper(gripperInterface1, 10, 1):
-   # pub_cmd_maincontroller.publish('operate_gripper(40,10)')
-    while forceLogic.slip_detect():
-        time.sleep(0.5)
-        forceLogic.slip_detect()
-    time.sleep(5)
+        #if gripperInterface2.operate_gripper(gripperInterface1, 10, 1):
+    # pub_cmd_maincontroller.publish('operate_gripper(40,10)')
+        while forceLogic.slip_detect():
+            time.sleep(0.5)
+            forceLogic.slip_detect()
+        time.sleep(5)
 
 
 

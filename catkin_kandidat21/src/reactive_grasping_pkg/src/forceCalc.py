@@ -54,9 +54,17 @@ class ForceCalcClass:
 
         return int(f_y_L)
 
+# TODO debugg and understand why this happens
+
     def get_F_z_L(self):
-        f_z_L = self.current_msg.split('=', )[6].split(']')[0]
-        return int(f_z_L)
+        try:
+            f_z_L = self.current_msg.split('=', )[6].split(']')[0]
+            return int(f_z_L)
+        except TypeError:
+            print('f_z_L value is ', f_z_L, 'temporarily sends same value as f_z_R')
+
+        finally:
+            return self.get_F_z_R()
 
     def slip_detect(self):
         #rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
