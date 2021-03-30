@@ -68,6 +68,7 @@ class Rg2ftModbusROSInterface:
     # Get data from registers regarding proximity and publishes on topic as a string
     def get_proximity_registers(self):
         prox_val_L = validator_int16(self.client.read_holding_registers(self.proximity_value_L_addr, 1, unit=self.rg2ft_device_addr))
+        #print('offset for L', validator_int16(self.client.read_holding_registers(self.proximity_offset_L_addr, 1, unit = self.rg2ft_device_addr)))
         prox_val_R = validator_int16(self.client.read_holding_registers(self.proximity_value_R_addr, 1, unit=self.rg2ft_device_addr))
 
         return '[proximity_value_R='+str(prox_val_R)+',proximity_value_L='+str(prox_val_L)+']'
@@ -176,7 +177,7 @@ class Rg2ftModbusROSInterface:
 
 
     def opeate_grippper_release(self):
-        self.operate_gripper(100, 10)
+        self.operate_gripper(80, 10)
         self.current_force = 10
         return True
 
@@ -241,7 +242,9 @@ class Rg2ftModbusROSInterface:
             self.sub_gripper_cmd = rospy.Subscriber('gripper_interface/gripper_cmd/', String ,self.gripper_cmd_handler, queue_size=5)
             publishing_rate_Hz = rospy.Rate(1)
 
-            # init service???
+            self.client.write_register(self.proximity_offset_L_addr, 170, unit=self.rg2ft_device_addr)
+            self.client.write_register(self.proximity_offset_R_addr, 260, unit=self.rg2ft_device_addr)
+
         else:
             print("Catastrophic error please check yo self!!")
 

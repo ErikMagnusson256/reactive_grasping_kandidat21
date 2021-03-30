@@ -2,9 +2,11 @@
 # TODO comments and bös
 import numpy
 
+#from proximityCalc import ProximityCalcClass
 import proximityCalc
 import armCalc
 from forceCalc import ForceCalcClass
+
 import time
 
 import rospy
@@ -28,10 +30,11 @@ def stage_test():
             time.sleep(0.1)
 
     forceLogic = ForceCalcClass()
+    proximityLogic = proximityCalc.ProximityCalcClass()
 
-    while not proximityCalc.prox_check():
+    while not proximityLogic.prox_check():
         time.sleep(0.5)
-        proximityCalc.prox_check()
+        proximityLogic.prox_check()
 
     #if gripperInterface2.operate_gripper(gripperInterface1, 10, 1):
    # pub_cmd_maincontroller.publish('operate_gripper(40,10)')

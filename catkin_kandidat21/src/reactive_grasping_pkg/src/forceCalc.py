@@ -76,7 +76,7 @@ class ForceCalcClass:
         # gripperInterface1.operate_gripper_step_force(0.1)
         pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
         # rospy.init_node('talkerdffdf', anonymous=True)
-        # pub_cmd_forcecalc.publish('operate_gripper_step_force(1)')
+        pub_cmd_forcecalc.publish('operate_gripper_step_force(5)')
         pub_cmd_forcecalc.publish('operate_gripper_step_width(5)')
 
     def __init__(self):
