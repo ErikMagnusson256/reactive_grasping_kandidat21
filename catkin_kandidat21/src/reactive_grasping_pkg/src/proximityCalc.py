@@ -11,8 +11,8 @@ import time
 import math
 import gripperInterface
 
-globa_msg = '[proximity_value_R=500,proximity_value_L=550]'
-tolerance =45 #mm
+globa_msg = '[proximity_value_R=300,proximity_value_L=550]'
+tolerance =30 #1/10 mm
 
 
 # Decodes the data that has been retrived from registers
@@ -58,14 +58,23 @@ def prox_check():
     #rospy.init_node('topic_subscriber_proxcalc')
     proximity_sub = rospy.Subscriber('/gripper_interface/proximity_data/', String, prox_data_handler)
 
-    pub = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+    pub_cmd_proximitycalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
     #rospy.init_node('talkerdffdf', anonymous=True)
     # Run gripping command from main? or just return a "good" status, start closing grippers and then run proxCheck()
     # again once fingers are closer to object? interesting if we could with this grip a moving object?
     if math.isclose(get_prox_L(), get_prox_R(), abs_tol=tolerance):
 
+        while not rospy.is_shutdown():
+            connections = pub_cmd_proximitycalc.get_num_connections()
+            if connections > 0:
+                target_width = 1000 - get_prox_R() - get_prox_L() - tolerance
+                if target_width < 0:
+                    target_width = 2
+                pub_cmd_proximitycalc.publish('operate_gripper(' + str(int(target_width)) + ',20)')
+                break
+            else:
+                time.sleep(0.1)
 
-        pub.publish('operate_gripper(42,1)')
 
         return True, print('Yay!', get_prox_L(), get_prox_R()) # ???
 
