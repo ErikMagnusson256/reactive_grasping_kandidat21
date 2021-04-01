@@ -6,6 +6,9 @@ import std_msgs.msg
 from std_msgs.msg import String
 import time
 import numpy as np
+import tf2_ros
+import geometry_msgs.msg
+import tf2_msgs.msg
 
 # only an example of easy implement for trial
 def move_R(distance):
@@ -16,6 +19,17 @@ def move_R(distance):
 #TODO descriptopm
 #essentially this is the interface we can use to controll the arm easily by eg. armCalc.UR10_robot_arm.move_start_pos()
 class UR10_robot_arm:
+
+    def callback_tf_listener(self, msg):
+        print('got a mail yo')
+        if msg.data.child_frame_id == "tool0_controller":
+            print('yay')
+
+    def test_tf_grunkor(self):
+        print('starting bös')
+        sub_tf = rospy.Subscriber('listen_tf', tf2_msgs.msg.TFMessage, self.callback_tf_listener, queue_size=1 )
+        while True:
+            i = 1
 
     # For now, move_gripper_R will move the arm in the direction of the finger marked R
     def move_gripper_R(self, distance_mm):
@@ -60,7 +74,9 @@ class UR10_robot_arm:
     # init internal variables and start communication with the arm itself
     # some type of check to see if communication with arm is successfull
     def __init__(self):
-        None
+        rospy.init_node('TEMP_armCtrl_tf_listener')
+       # self.test_tf_grunkor()
 
 if __name__ == '__main__':
-    None
+    arm = UR10_robot_arm()
+    arm.test_tf_grunkor()
