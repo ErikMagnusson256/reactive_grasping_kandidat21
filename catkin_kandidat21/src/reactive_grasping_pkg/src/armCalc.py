@@ -9,6 +9,7 @@ import numpy as np
 import tf2_ros
 import geometry_msgs.msg
 import tf2_msgs.msg
+import math
 
 # only an example of easy implement for trial
 def move_R(distance):
@@ -26,10 +27,39 @@ class UR10_robot_arm:
             print('yay')
 
     def test_tf_grunkor(self):
-        print('starting bös')
-        sub_tf = rospy.Subscriber('listen_tf', tf2_msgs.msg.TFMessage, self.callback_tf_listener, queue_size=1 )
-        while True:
-            i = 1
+        tfBuffer = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(tfBuffer)
+
+        frame_name = rospy.get_param('tool0_controller','base')
+
+        rate = rospy.Rate(10.0)
+
+        while not rospy.is_shutdown():
+            try:
+                trans = tfBuffer.lookup_transform(frame_name, 'tool0_controller', rospy.Time())
+                xTrans = trans.transform.translation.x
+                yTrans = trans.transform.translation.y
+                zTrans = trans.transform.translation.z
+
+                xRot = (trans.transform.rotation.x)
+                yRot =  (trans.transform.rotation.y)
+                zRot =  (trans.transform.rotation.z)
+                wRot = trans.transform.rotation.w
+
+                print('xTrans = ', xTrans)
+                print('yTrans = ', yTrans)
+                print('zTrans = ', zTrans)
+
+                print('xRot = ', xRot)
+                print('yRot = ', yRot)
+                print('zRot = ', zRot)
+                print('wRot = ', wRot)
+                print('child name_:', trans.child_frame_id, ' frame id:', trans.header.frame_id)
+
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+                rate.sleep()
+                continue
+
 
     # For now, move_gripper_R will move the arm in the direction of the finger marked R
     def move_gripper_R(self, distance_mm):
