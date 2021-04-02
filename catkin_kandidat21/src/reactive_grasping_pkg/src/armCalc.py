@@ -10,7 +10,8 @@ import tf2_ros
 import geometry_msgs.msg
 import tf2_msgs.msg
 import math
-
+import numpy as np
+import tf_conversions
 # only an example of easy implement for trial
 def move_R(distance):
     # send moveJ base joint tiny tiny amount to right for starters?
@@ -21,44 +22,32 @@ def move_R(distance):
 #essentially this is the interface we can use to controll the arm easily by eg. armCalc.UR10_robot_arm.move_start_pos()
 class UR10_robot_arm:
 
-    def callback_tf_listener(self, msg):
-        print('got a mail yo')
-        if msg.data.child_frame_id == "tool0_controller":
-            print('yay')
+    def read_gripper_translation_rotation(self):
+        try:
+            trans = self.tfBuffer.lookup_transform(self.frame_name, 'tool0_controller', rospy.Time())
+            self.xTranslation = trans.transform.translation.x + self.gripper_offset
+            self.yTranslation = trans.transform.translation.y + self.gripper_offset
+            self.zTranslation = trans.transform.translation.z + self.gripper_offset
+            a=tf_conversions.transformations.euler_from_quaternion([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
+            print('A', np.rad2deg(a))
+            self.Rx,self.Ry, self.Rz = self.quaternion_to_euler(trans.transform.rotation.x,
+                                                                trans.transform.rotation.y,
+                                                                trans.transform.rotation.z,
+                                                                trans.transform.rotation.w)
+            print('qx:', trans.transform.rotation.x, 'qy:', trans.transform.rotation.y, 'qz:', trans.transform.rotation.z, 'qw:', trans.transform.rotation.w)
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            print('not found trans yet')
 
-    def test_tf_grunkor(self):
-        tfBuffer = tf2_ros.Buffer()
-        listener = tf2_ros.TransformListener(tfBuffer)
+    def quaternion_to_euler(self, x, y, z, w):
+        # y z w x
+        quat = [x, y, z, w]
+        quat = quat / np.linalg.norm(quat)
+        angle = 2 * math.acos(quat[0])
+        s = math.sqrt(1 - quat[0]*quat[0])
+        orientation = [angle, 0, 0] if s < 1e-3 else (angle / s*quat[1:]).tolist()
+        return orientation[0], orientation[1], orientation[2]
 
-        frame_name = rospy.get_param('tool0_controller','base')
 
-        rate = rospy.Rate(10.0)
-
-        while not rospy.is_shutdown():
-            try:
-                trans = tfBuffer.lookup_transform(frame_name, 'tool0_controller', rospy.Time())
-                xTrans = trans.transform.translation.x
-                yTrans = trans.transform.translation.y
-                zTrans = trans.transform.translation.z
-
-                xRot = (trans.transform.rotation.x)
-                yRot =  (trans.transform.rotation.y)
-                zRot =  (trans.transform.rotation.z)
-                wRot = trans.transform.rotation.w
-
-                print('xTrans = ', xTrans)
-                print('yTrans = ', yTrans)
-                print('zTrans = ', zTrans)
-
-                print('xRot = ', xRot)
-                print('yRot = ', yRot)
-                print('zRot = ', zRot)
-                print('wRot = ', wRot)
-                print('child name_:', trans.child_frame_id, ' frame id:', trans.header.frame_id)
-
-            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-                rate.sleep()
-                continue
 
 
     # For now, move_gripper_R will move the arm in the direction of the finger marked R
@@ -83,6 +72,16 @@ class UR10_robot_arm:
 
     def move_gripper_backwards(self, distance_mm):
         # "only" need to move against the direction of the calculated orientation.
+        dir_vec = [-1*self.Rx, -1*self.Ry, -1*self.Rz]
+        len_dir_vec = math.sqrt(self.Rx**2 + self.Ry**2, self.Rz**2)
+        normalised_dir_vec = dir_vec / len_dir_vec
+        move_distance = 0.1 #10 cm
+
+        newX = self.xTranslation + normalised_dir_vec[0]*move_distance
+        newY = self.yTranslation + normalised_dir_vec[1]*move_distance
+        newZ = self.zTranslation + normalised_dir_vec[2]*move_distance
+
+    def execute_movel_cmd(self,x, y, z, Rx, Ry, Rz, a=0.05, v=0.05,r=0,t=0):
         None
 
     def move_gripper_up(self, distance_mm):
@@ -101,12 +100,35 @@ class UR10_robot_arm:
     def move_to_starting_pos(self):
         None
 
+    def test(self):
+        while not rospy.is_shutdown():
+            self.read_gripper_translation_rotation()
+
+            print('Albins x:',self.xTranslation, 'y:', self.yTranslation, 'z:', self.zTranslation, 'Rx:', np.rad2deg(self.Rx), 'Ry:', np.rad2deg(self.Ry), 'Rz:', np.rad2deg(self.Rz), ' OBS nu äre i grader')
+            print('waiting 1 seconds... chill dude')
+            time.sleep(1)
+
     # init internal variables and start communication with the arm itself
     # some type of check to see if communication with arm is successfull
     def __init__(self):
-        rospy.init_node('TEMP_armCtrl_tf_listener')
+        rospy.init_node('armCtrl_node')
        # self.test_tf_grunkor()
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.frame_name = rospy.get_param('tool0_controller', 'base')
+
+        self.xTranslation = 0
+        self.yTranslation = 0
+        self.zTranslation = 0
+        self.Rx = 0
+        self.Ry = 0
+        self.Rz = 0
+
+        self.gripper_offset = 0 # vector length offset that tells how far from TCP the gripper TCP is at a given moment. Can change depending on how open/close the gripper is
+        self.read_gripper_translation_rotation()
+
+        self.script_cmd_publishers = rospy.Publisher('/ur_hardware_interface/script_command', String, queue_size=1)
 
 if __name__ == '__main__':
     arm = UR10_robot_arm()
-    arm.test_tf_grunkor()
+    arm.test()
