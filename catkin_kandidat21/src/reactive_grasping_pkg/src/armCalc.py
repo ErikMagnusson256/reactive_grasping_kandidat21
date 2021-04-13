@@ -12,6 +12,10 @@ import tf2_msgs.msg
 import math
 import numpy as np
 import tf_conversions
+from geometry_msgs.msg import Quaternion
+from tf.transformations import *
+import vectors #sudo pip3 install vectors
+
 # only an example of easy implement for trial
 def move_R(distance):
     # send moveJ base joint tiny tiny amount to right for starters?
@@ -28,25 +32,39 @@ class UR10_robot_arm:
             self.xTranslation = trans.transform.translation.x + self.gripper_offset
             self.yTranslation = trans.transform.translation.y + self.gripper_offset
             self.zTranslation = trans.transform.translation.z + self.gripper_offset
-            a=tf_conversions.transformations.euler_from_quaternion([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
-            print('A', np.rad2deg(a))
-            self.Rx,self.Ry, self.Rz = self.quaternion_to_euler(trans.transform.rotation.x,
+
+
+            a=tf_conversions.transformations.euler_from_quaternion((trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w))
+
+            print('A',np.trunc(np.rad2deg(a)))
+            #roll pitch yaw
+            self.Rx,self.Ry, self.Rz = tf_conversions.transformations.euler_from_quaternion((trans.transform.rotation.x,
                                                                 trans.transform.rotation.y,
                                                                 trans.transform.rotation.z,
-                                                                trans.transform.rotation.w)
+                                                                trans.transform.rotation.w))
             print('qx:', trans.transform.rotation.x, 'qy:', trans.transform.rotation.y, 'qz:', trans.transform.rotation.z, 'qw:', trans.transform.rotation.w)
+
+            v_yx = [np.cos(self.Rz), np.sin(self.Rz), 0]
+            v_zx = [np.cos(self.Ry), 0,np.cos(self.Rz)]
+            v_zy = [0, np.cos(self.Rx), np.sin(self.Rx)]
+
+            v_r = np.add(v_yx, v_zx)
+            v_r = np.add(v_r, v_zy)
+
+            v_r_len = np.sqrt(v_r[0]**2 + v_r[1]**2 + v_r[2]**2)
+            v_r = v_r / v_r_len
+
+            self.direction_normal = v_r
+
+            #direction vector that the gripper is pointing in, normalised, length = 1
+            #self.direction_normal = vectors.Vector(np.cos(self.Rz), np.cos(self.Rx), np.cos(self.Ry))
+            #self.direction_normal = vectors.Vector(np.cos(self.Rz)*np.cos(self.Ry), np.sin(self.Rz)*np.cos(self.Ry), np.sin(self.Ry))
+            #self.direction_normal = self.direction_normal.multiply(1/self.direction_normal.magnitude())
+            print('v1:', v_yx, 'v2:', v_zx, 'v3:', v_zy)
+            print('direction normal:', (self.direction_normal), 'len', np.sqrt(v_r[0]**2 + v_r[1]**2 + v_r[2]**2))
+
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             print('not found trans yet')
-
-    def quaternion_to_euler(self, x, y, z, w):
-        # y z w x
-        quat = [x, y, z, w]
-        quat = quat / np.linalg.norm(quat)
-        angle = 2 * math.acos(quat[0])
-        s = math.sqrt(1 - quat[0]*quat[0])
-        orientation = [angle, 0, 0] if s < 1e-3 else (angle / s*quat[1:]).tolist()
-        return orientation[0], orientation[1], orientation[2]
-
 
 
 
@@ -104,8 +122,8 @@ class UR10_robot_arm:
         while not rospy.is_shutdown():
             self.read_gripper_translation_rotation()
 
-            print('Albins x:',self.xTranslation, 'y:', self.yTranslation, 'z:', self.zTranslation, 'Rx:', np.rad2deg(self.Rx), 'Ry:', np.rad2deg(self.Ry), 'Rz:', np.rad2deg(self.Rz), ' OBS nu äre i grader')
-            print('waiting 1 seconds... chill dude')
+            #print('Albins x:',self.xTranslation, 'y:', self.yTranslation, 'z:', self.zTranslation, 'Rx:', np.rad2deg(self.Rx), 'Ry:', np.rad2deg(self.Ry), 'Rz:', np.rad2deg(self.Rz), ' OBS nu äre i grader')
+            #print('waiting 1 seconds... chill dude')
             time.sleep(1)
 
     # init internal variables and start communication with the arm itself
@@ -123,6 +141,7 @@ class UR10_robot_arm:
         self.Rx = 0
         self.Ry = 0
         self.Rz = 0
+        self.direction_normal = [0, 0, 0]
 
         self.gripper_offset = 0 # vector length offset that tells how far from TCP the gripper TCP is at a given moment. Can change depending on how open/close the gripper is
         self.read_gripper_translation_rotation()
