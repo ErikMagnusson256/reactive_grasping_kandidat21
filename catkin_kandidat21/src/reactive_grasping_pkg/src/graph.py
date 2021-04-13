@@ -140,9 +140,9 @@ class Rg2ftModbusROSInterface:
                 force_data_R_z = []
                 force_data_L_z = []
                 #gripper_width_data = []
-                force=200
+                force=400
 
-                self.client.write_register(self.target_width_addr, 445, unit=self.rg2ft_device_addr)
+                self.client.write_register(self.target_width_addr, 300, unit=self.rg2ft_device_addr)
                 self.client.write_register(self.target_force_addr, force, unit=self.rg2ft_device_addr)
                 self.client.write_register(self.control_addr, 1, unit=self.rg2ft_device_addr)
 
@@ -194,9 +194,9 @@ class Rg2ftModbusROSInterface:
 
                 plt.legend(['Force_x_L: ' +str(round(average_x_L,4)), 'Force_x_R: '+str(round(average_x_R,4)),
                             'Force_y_L: ' + str(round(average_y_L, 4)), 'Force_y_R: ' + str(round(average_y_R, 4)),
-                            'Force_z_L: ' + str(round(average_z_L, 4)), 'Force_z_R: ' + str(round(average_z_R, 4))])
-#min(average_y_R,average_x_R,average_Z_R),max(average_y_R,average_x_R,average_Z_R)
-                plt.yticks(np.arange(min(force_data_L_x)-1,max(force_data_L_z)+2, 1), fontsize=8)
+                            'Force_z_L: ' + str(round(average_z_L, 4)), 'Force_y_R: ' + str(round(average_z_R, 4))])
+
+                plt.yticks(np.arange(-12, 33, 2), fontsize=8)
                 x_lab = 'x - delta time between datapoints: ' + str(delta_t) + ' s'
                 plt.xlabel(x_lab)
                 plt.ylabel('[Newton]')
@@ -327,7 +327,7 @@ if __name__ == '__main__':
 
     C = Rg2ftModbusROSInterface()
     #C.generate_graphs(1, 200, 0.005)
-    C.generate_graphs_force(1, 100, 0.05)
+    C.generate_graphs_force(1, 100, 0.01)
     #C.run()
 
 
