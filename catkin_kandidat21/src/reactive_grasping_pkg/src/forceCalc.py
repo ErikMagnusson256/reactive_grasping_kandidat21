@@ -26,79 +26,97 @@ def validator_int16(instance):
         print("There isn't the registers, Try again.")
         return None
 
-global_msg = '[F_x_R=1,F_y_R=2,F_z_R=5,F_x_L=1,F_y_L=2,F_z_L=1]'
+class ForceCalcClass:
 
-def force_torque_data_handler(msg):
-    global_msg = (msg)
+    def force_torque_data_handler(self, msg):
+        self.current_msg = msg.data
+        #print(self.current_msg)
+        #print(self.get_F_z_L())
 
+    def get_F_x_R(self):
+        f_x_R = self.current_msg.split('=', 1)[1].split(',')[0]
+        return int(f_x_R)
 
-def get_F_x_R():
-    f_x_R = global_msg.split('=', 1)[1].split(',')[0]
-    return int(f_x_R)
+    def get_F_y_R(self):
+        f_y_R = self.current_msg.split('=', )[2].split(',')[0]
+        return int(f_y_R)
 
+    def get_F_z_R(self):
+        f_z_R = self.current_msg.split('=', )[3].split(',')[0]
+        return int(f_z_R)
 
-def get_F_y_R():
-    f_y_R = global_msg.split('=',)[2].split(',')[0]
-    return int(f_y_R)
+    def get_F_x_L(self):
+        f_x_L = self.current_msg.split('=', )[4].split(',')[0]
+        return int(f_x_L)
 
+    def get_F_y_L(self):
+        f_y_L = self.current_msg.split('=', )[5].split(',')[0]
 
-def get_F_z_R():
-    f_z_R = global_msg.split('=',)[3].split(',')[0]
-    return int(f_z_R)
+        return int(f_y_L)
 
+# TODO debugg and understand why this happens
 
-def get_F_x_L():
-    f_x_L = global_msg.split('=',)[4].split(',')[0]
-    return int(f_x_L)
+    def get_F_z_L(self):
+        try:
+            f_z_L = self.current_msg.split('=', )[6].split(']')[0]
+            return int(f_z_L)
+        except TypeError:
+            print('f_z_L value is ', f_z_L, 'temporarily sends same value as f_z_R')
 
+        finally:
+            return self.get_F_z_R()
 
-def get_F_y_L():
-    f_y_L = global_msg.split('=',)[5].split(',')[0]
-    return int(f_y_L)
+    def slip_detect(self):
+        #rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
 
+        if (np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)) > abs((self.get_F_z_L() * 0.5))) or (
+                np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)) > abs((self.get_F_z_R() * 0.5))):
+            print('Caught me slipping')
+            print(np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)), '>', (self.get_F_z_L() * 0.5))
+            print(np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)), '>', (self.get_F_z_R() * 0.5))
+            self.slip_react()
+            time.sleep(1)
+            return True
+        else:
+            return False, print('All good')
 
-def get_F_z_L():
-    f_z_L = global_msg.split('=',)[6].split(']')[0]
-    return int(f_z_L)
+    def slip_react(self):
+        # gripperInterface1.operate_gripper_step_force(0.1)
+        pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+        # rospy.init_node('talkerdffdf', anonymous=True)
+        pub_cmd_forcecalc.publish('operate_gripper_step_force(5)')
+        pub_cmd_forcecalc.publish('operate_gripper_step_width(5)')
 
+    def __init__(self):
+        self.current_msg = '[F_x_R=1,F_y_R=2,F_z_R=5,F_x_L=1,F_y_L=2,F_z_L=1]'
+        rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
 
-def slip_detect():
-    if ((np.sqrt((get_F_x_L()**2)+(get_F_y_L()**2)) > (get_F_z_L())) * 0.5 or (np.sqrt((get_F_x_R()**2)+(get_F_y_R()**2)) > (get_F_z_R() * 0.5))):
-        print('Caught me slipping')
-        slip_react()
-        return True
-    else:
-        return False, print('All good')
-
-def slip_react():
-    #gripperInterface1.operate_gripper_step_force(0.1)
-    pub = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
-    # rospy.init_node('talkerdffdf', anonymous=True)
-    pub.publish('operate_gripper_step_force(1)')
 
 
 def main():
-    rospy.init_node('topic_subscriber')
-    force_torque_sub = rospy.Subscriber('/gripper_interface/force_torque_data/', String, force_torque_data_handler)  # listens to a topic and calls prox_data_handler
+    #rospy.init_node('topic_subscriber')
+  #  force_torque_sub = rospy.Subscriber('/gripper_interface/force_torque_data/', String, force_torque_data_handler)  # listens to a topic and calls prox_data_handler
     #rospy.spin()
 
-    while True:
-        print("fxr:", get_F_x_R())
-        print("fyr:", get_F_y_R())
-        print("fzr:", get_F_z_R())
-        print("fxl:", get_F_x_L())
-        print("fyl:", get_F_y_L())
-        print("fzl:", get_F_z_L())
-        slip_detect()
-        time.sleep(1)
+    # while True:
+    #     print("fxr:", get_F_x_R())
+    #     print("fyr:", get_F_y_R())
+    #     print("fzr:", get_F_z_R())
+    #     print("fxl:", get_F_x_L())
+    #     print("fyl:", get_F_y_L())
+    #     print("fzl:", get_F_z_L())
+    #     slip_detect()
+    #     time.sleep(1)
+    forceLogic = ForceCalcClass()
+    forceLogic.get_F_z_L()
 
 
 if __name__ == '__main__':
     main()
-    print("fxr:",get_F_x_R())
-    print("fyr:",get_F_y_R())
-    print("fzr:", get_F_z_R())
-    print("fxl:", get_F_x_L())
-    print("fyl:",get_F_y_L())
-    print("fzl:",get_F_z_L())
-    slip_detect()
+    # print("fxr:",get_F_x_R())
+    # print("fyr:",get_F_y_R())
+    # print("fzr:", get_F_z_R())
+    # print("fxl:", get_F_x_L())
+    # print("fyl:",get_F_y_L())
+    # print("fzl:",get_F_z_L())
+    # slip_detect()

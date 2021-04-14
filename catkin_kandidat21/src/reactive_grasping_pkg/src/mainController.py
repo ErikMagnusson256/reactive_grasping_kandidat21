@@ -2,10 +2,11 @@
 # TODO comments and bös
 import numpy
 
+#from proximityCalc import ProximityCalcClass
 import proximityCalc
 import armCalc
-import forceCalc
-from gripperInterface import Rg2ftModbusROSInterface as gripperInterface1
+from forceCalc import ForceCalcClass
+
 import time
 
 import rospy
@@ -14,22 +15,34 @@ from pymodbus.payload import BinaryPayloadDecoder
 
 def stage_test():
     # add whatever you want to try, be smart about the order
-    rospy.init_node('talker_maincontroller', anonymous=True)
-    pub = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+
+    pub_cmd_maincontroller = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
 
 
-    pub.publish('operate_gripper_release')
+    #test to see hwo to send just one msg
+    while not rospy.is_shutdown():
+        connections = pub_cmd_maincontroller.get_num_connections()
+        if connections > 0:
+            pub_cmd_maincontroller.publish('operate_gripper_release')
+            print('yay maincontroller sent a msg')
+            break
+        else:
+            time.sleep(0.1)
 
-    while not proximityCalc.prox_check():
-        proximityCalc.prox_check()
+    while not rospy.is_shutdown():
+        forceLogic = ForceCalcClass()
+        proximityLogic = proximityCalc.ProximityCalcClass()
 
+        while not proximityLogic.prox_check():
+            time.sleep(0.5)
+            proximityLogic.prox_check()
 
-
-    #if gripperInterface2.operate_gripper(gripperInterface1, 10, 1):
-    pub.publish('operate_gripper(40,10)')
-    while forceCalc.slip_detect():
-        forceCalc.slip_detect()
-    time.sleep(5)
+        #if gripperInterface2.operate_gripper(gripperInterface1, 10, 1):
+    # pub_cmd_maincontroller.publish('operate_gripper(40,10)')
+        while forceLogic.slip_detect():
+            time.sleep(0.5)
+            forceLogic.slip_detect()
+        time.sleep(5)
 
 
 
@@ -72,6 +85,8 @@ def stage_6():
     None
 
 if __name__ == '__main__':
+
+    rospy.init_node('talker_maincontroller', anonymous=True)
     stage_test()
 
 class MainController:
