@@ -114,20 +114,47 @@ class UR10_robot_arm:
         #its possible we want to
     def move_gripper_forwards(self, distance_mm):
         # "only" need to move in the direction of the calculated orientation.
-        None
+        # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
+        # points head forward
+
+        # gripper orientation points it towards table
+        newRx = np.pi / 2
+        newRy = 0
+        newRz = 0
+
+        # gripper position
+        newX = self.xTranslation
+        newY = self.yTranslation - distance_mm * 0.001  # converts to meters
+        newZ = self.zTranslation
+
+        self.execute_movel_cmd(newX, newY, newZ, newRx, newRy, newRz)
 
     def move_gripper_backwards(self, distance_mm):
         # "only" need to move against the direction of the calculated orientation.
-        dir_vec = [-1*self.Rx, -1*self.Ry, -1*self.Rz]
-        len_dir_vec = math.sqrt(self.Rx**2 + self.Ry**2, self.Rz**2)
-        normalised_dir_vec = dir_vec / len_dir_vec
-        move_distance = 0.1 #10 cm
 
-        newX = self.xTranslation + normalised_dir_vec[0]*move_distance
-        newY = self.yTranslation + normalised_dir_vec[1]*move_distance
-        newZ = self.zTranslation + normalised_dir_vec[2]*move_distance
+        # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
+        # points head forward
 
-    # Executes a command to the robot, prints in command prompt when sent
+        # gripper orientation points it towards table
+        newRx = np.pi / 2
+        newRy = 0
+        newRz = 0
+
+        # gripper position
+        newX = self.xTranslation
+        newY = self.yTranslation + distance_mm * 0.001  # converts to meters
+        newZ = self.zTranslation
+
+        self.execute_movel_cmd(newX, newY, newZ, newRx, newRy, newRz)
+
+
+    def depth_compensation_gripper(self, current_width_mm, target_width_mm):
+        #Moves the TCP forwards or backwards depending on how gripper is opening/closing
+        #Krooks kod
+
+        None
+
+        # Executes a command to the robot, prints in command prompt when sent
     def execute_movel_cmd(self,x, y, z, Rx, Ry, Rz, a=0.05, v=0.05,r=0):
         print('starting to execute command')
         movel_cmd = 'movel(p[' + str(x) + ',' + str(y) + ',' + str(z)+ ',' + str(Rx) + ',' + str(Ry) + ',' + str(Rz) + '],' + str(a) + ',' + str(v) + ',' + str(r) + ')'
@@ -167,7 +194,7 @@ class UR10_robot_arm:
         # points head forward
 
         # gripper orientation points it towards table
-        newRx = np.pi / 2
+        newRx = np.pi/2
         newRy = 0
         newRz = 0
 
@@ -186,6 +213,22 @@ class UR10_robot_arm:
     def move_to_starting_pos(self):
         None
 
+    def move_forward_test_150_mm(self):
+        while not rospy.is_shutdown():
+            while self.xTranslation == 0:
+                self.read_gripper_translation_rotation()
+
+            print('xtrans:', self.xTranslation)
+
+            self.read_gripper_translation_rotation()
+            self.move_gripper_forwards(150)
+            time.sleep(5)
+            self.read_gripper_translation_rotation()
+            self.move_gripper_backwards(150)
+            time.sleep(5)
+
+
+
     def move_square_200_mm(self):
         while not rospy.is_shutdown():
 
@@ -197,7 +240,6 @@ class UR10_robot_arm:
             print('xtrans:', self.xTranslation)
 
             self.read_gripper_translation_rotation() #reads current robot poistion (not pose atm)
-
             self.move_gripper_up(200)
             time.sleep(10)
             self.read_gripper_translation_rotation()  # reads current robot poistion (not pose atm)
@@ -270,4 +312,4 @@ class UR10_robot_arm:
 
 if __name__ == '__main__':
     arm = UR10_robot_arm()
-    arm.move_square_200_mm()
+    arm.move_forward_test_150_mm()
