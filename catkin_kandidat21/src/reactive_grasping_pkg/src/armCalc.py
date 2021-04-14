@@ -38,11 +38,18 @@ class UR10_robot_arm:
 
             print('A',np.trunc(np.rad2deg(a)))
             #roll pitch yaw
-            self.Rx,self.Ry, self.Rz = tf_conversions.transformations.euler_from_quaternion((trans.transform.rotation.x,
+            '''self.Rx,self.Ry, self.Rz = tf_conversions.transformations.euler_from_quaternion((trans.transform.rotation.x,
                                                                 trans.transform.rotation.y,
                                                                 trans.transform.rotation.z,
                                                                 trans.transform.rotation.w))
-            print('qx:', trans.transform.rotation.x, 'qy:', trans.transform.rotation.y, 'qz:', trans.transform.rotation.z, 'qw:', trans.transform.rotation.w)
+
+            '''
+            # TODO temp solution
+            self.Rx = np.pi/2
+            self.Ry = 0
+            self.Rz = 0
+
+            #print('qx:', trans.transform.rotation.x, 'qy:', trans.transform.rotation.y, 'qz:', trans.transform.rotation.z, 'qw:', trans.transform.rotation.w)
 
             v_yx = [np.cos(self.Rz), np.sin(self.Rz), 0]
             v_zx = [np.cos(self.Ry), 0,np.cos(self.Rz)]
@@ -55,13 +62,6 @@ class UR10_robot_arm:
             v_r = v_r / v_r_len
 
             self.direction_normal = v_r
-
-            #direction vector that the gripper is pointing in, normalised, length = 1
-            #self.direction_normal = vectors.Vector(np.cos(self.Rz), np.cos(self.Rx), np.cos(self.Ry))
-            #self.direction_normal = vectors.Vector(np.cos(self.Rz)*np.cos(self.Ry), np.sin(self.Rz)*np.cos(self.Ry), np.sin(self.Ry))
-            #self.direction_normal = self.direction_normal.multiply(1/self.direction_normal.magnitude())
-            print('v1:', v_yx, 'v2:', v_zx, 'v3:', v_zy)
-            print('direction normal:', (self.direction_normal), 'len', np.sqrt(v_r[0]**2 + v_r[1]**2 + v_r[2]**2))
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             print('not found trans yet')
@@ -77,11 +77,39 @@ class UR10_robot_arm:
         # By reading the orientation of the last joint we can turn that orthogonal plane into a line we can move along.
         # This way we would ensure that we always move in the direction we intend.
         # This would need to be divided into separate functions to make it tidy and functional.
-        None
+
+        # TODO TEMP SOLUTION: ONLY MOVES RIGHT aka +x RELATIVE TO GLOABAL SYSTEM
+        # points head forward
+
+        # gripper orientation points it towards table
+        newRx = np.pi / 2
+        newRy = 0
+        newRz = 0
+
+        # gripper position
+        newX = self.xTranslation + distance_mm * 0.001  # converts to meters
+        newY = self.yTranslation
+        newZ = self.zTranslation
+
+        self.execute_movel_cmd(newX, newY, newZ, newRx, newRy, newRz)
 
     def move_gripper_L(self, distance_mm):
         # same as above but in the other direction along calculated line.
-        None
+
+        # TODO TEMP SOLUTION: ONLY MOVES LEFT aka -x RELATIVE TO GLOABAL SYSTEM
+        # points head forward
+
+        # gripper orientation points it towards table
+        newRx = np.pi / 2
+        newRy = 0
+        newRz = 0
+
+        # gripper position
+        newX = self.xTranslation - distance_mm * 0.001  # converts to meters
+        newY = self.yTranslation
+        newZ = self.zTranslation
+
+        self.execute_movel_cmd(newX, newY, newZ, newRx, newRy, newRz)
 
         #its possible we want to
     def move_gripper_forwards(self, distance_mm):
@@ -99,16 +127,56 @@ class UR10_robot_arm:
         newY = self.yTranslation + normalised_dir_vec[1]*move_distance
         newZ = self.zTranslation + normalised_dir_vec[2]*move_distance
 
-    def execute_movel_cmd(self,x, y, z, Rx, Ry, Rz, a=0.05, v=0.05,r=0,t=0):
-        None
+    # Executes a command to the robot, prints in command prompt when sent
+    def execute_movel_cmd(self,x, y, z, Rx, Ry, Rz, a=0.05, v=0.05,r=0):
+        print('starting to execute command')
+        movel_cmd = 'movel(p[' + str(x) + ',' + str(y) + ',' + str(z)+ ',' + str(Rx) + ',' + str(Ry) + ',' + str(Rz) + '],' + str(a) + ',' + str(v) + ',' + str(r) + ')'
+
+        while not rospy.is_shutdown():
+            connections = self.script_cmd_publisher.get_num_connections()
+            if connections > 0:
+                self.script_cmd_publisher.publish(movel_cmd)
+                print('command has been executed : ', movel_cmd)
+                break
+            else:
+                time.sleep(0.001)
+
+
 
     def move_gripper_up(self, distance_mm):
         # move vertically, or move "up" from the grippers perspective? keep gripper at same direction?
-        None
+
+        # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
+        # points head forward
+
+        #gripper orientation points it towards table
+        newRx = np.pi/2
+        newRy = 0
+        newRz = 0
+
+        #gripper position
+        newX = self.xTranslation
+        newY = self.yTranslation
+        newZ = self.zTranslation + distance_mm*0.001 #converts to meters
+
+        self.execute_movel_cmd(newX, newY, newZ, newRx, newRy, newRz)
 
     def move_gripper_down(self, distance_mm):
         # same as up function
-        None
+        # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
+        # points head forward
+
+        # gripper orientation points it towards table
+        newRx = np.pi / 2
+        newRy = 0
+        newRz = 0
+
+        # gripper position
+        newX = self.xTranslation
+        newY = self.yTranslation
+        newZ = self.zTranslation - distance_mm * 0.001  # converts to meters
+
+        self.execute_movel_cmd(newX, newY, newZ, newRx, newRy, newRz)
 
     # do we want functions that move the arm in a "absolute" direction? what is described above is all relative to the
     # gripper. These are needed to adjust position from the sensor feedback, but might be unnecessarily complicated
@@ -118,13 +186,64 @@ class UR10_robot_arm:
     def move_to_starting_pos(self):
         None
 
+    def move_square_200_mm(self):
+        while not rospy.is_shutdown():
+
+            print('waiting for ok trans')
+
+            while self.xTranslation == 0:
+                self.read_gripper_translation_rotation()
+
+            print('xtrans:', self.xTranslation)
+
+            self.read_gripper_translation_rotation() #reads current robot poistion (not pose atm)
+
+            self.move_gripper_up(200)
+            time.sleep(10)
+            self.read_gripper_translation_rotation()  # reads current robot poistion (not pose atm)
+            self.move_gripper_R(200)
+            time.sleep(10)
+            self.read_gripper_translation_rotation()  # reads current robot poistion (not pose atm)
+            self.move_gripper_down(200)
+            time.sleep(10)
+            self.read_gripper_translation_rotation()  # reads current robot poistion (not pose atm)
+            self.move_gripper_L(200)
+            time.sleep(10)
+
+            print('successfuly moved in a square!!')
+
+
+
     def test(self):
         while not rospy.is_shutdown():
-            self.read_gripper_translation_rotation()
+
+            print('waiting for ok trans')
+
+            while self.xTranslation == 0:
+                self.read_gripper_translation_rotation()
+
+            print('xtrans:', self.xTranslation)
+
+
+
+            #points head forward
+            dir_x = np.pi / 2
+            dir_y = 0
+            dir_z = 0
+
+            newX = self.xTranslation - 0.05
+            newY = self.yTranslation
+            newZ = self.zTranslation
+
+            self.execute_movel_cmd(newX, newY, newZ, dir_x, dir_y, dir_z)
 
             #print('Albins x:',self.xTranslation, 'y:', self.yTranslation, 'z:', self.zTranslation, 'Rx:', np.rad2deg(self.Rx), 'Ry:', np.rad2deg(self.Ry), 'Rz:', np.rad2deg(self.Rz), ' OBS nu äre i grader')
-            #print('waiting 1 seconds... chill dude')
-            time.sleep(1)
+            print('Data values from /tf: x', self.xTranslation, ' y', self.yTranslation, ' z', self.zTranslation)
+            print('waiting 5 seconds... chill dude')
+
+            self.read_gripper_translation_rotation() #reads new pos
+
+            time.sleep(2)
 
     # init internal variables and start communication with the arm itself
     # some type of check to see if communication with arm is successfull
@@ -134,6 +253,7 @@ class UR10_robot_arm:
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
         self.frame_name = rospy.get_param('tool0_controller', 'base')
+        self.script_cmd_publisher = rospy.Publisher('/ur_hardware_interface/script_command/', String, queue_size=1)
 
         self.xTranslation = 0
         self.yTranslation = 0
@@ -150,4 +270,4 @@ class UR10_robot_arm:
 
 if __name__ == '__main__':
     arm = UR10_robot_arm()
-    arm.test()
+    arm.move_square_200_mm()
