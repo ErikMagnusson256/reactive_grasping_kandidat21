@@ -15,6 +15,7 @@ from pymodbus.payload import BinaryPayloadDecoder
 
 def stage_test():
     # add whatever you want to try, be smart about the order
+    armm = armCalc.UR10_robot_arm()
 
     pub_cmd_maincontroller = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
 
@@ -22,6 +23,7 @@ def stage_test():
     #test to see hwo to send just one msg
     while not rospy.is_shutdown():
         connections = pub_cmd_maincontroller.get_num_connections()
+        print('snurring')
         if connections > 0:
             pub_cmd_maincontroller.publish('operate_gripper_release')
             print('yay maincontroller sent a msg')
@@ -36,6 +38,10 @@ def stage_test():
         while not proximityLogic.prox_check():
             time.sleep(0.5)
             proximityLogic.prox_check()
+
+        print('proximity done')
+
+        armm.move_gripper_up(10)
 
         #if gripperInterface2.operate_gripper(gripperInterface1, 10, 1):
     # pub_cmd_maincontroller.publish('operate_gripper(40,10)')

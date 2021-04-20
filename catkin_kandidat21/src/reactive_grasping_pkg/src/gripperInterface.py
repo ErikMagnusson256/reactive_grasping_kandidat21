@@ -72,6 +72,10 @@ class Rg2ftModbusROSInterface:
         prox_val_R = validator_int16(self.client.read_holding_registers(self.proximity_value_R_addr, 1, unit=self.rg2ft_device_addr))
 
         return '[proximity_value_R='+str(prox_val_R)+',proximity_value_L='+str(prox_val_L)+']'
+    def get_current_width_registers(self):
+
+        current_width = validator_int16(self.client.read_holding_registers(self.gripper_width_addr, 1, unit = self.rg2ft_device_addr))
+        return str(current_width)
 
     # Get data from registes regarding force and torque and publishes on topic as string
     def get_force_registers(self):
@@ -101,9 +105,12 @@ class Rg2ftModbusROSInterface:
             prox_data = self.get_proximity_registers()
             misc_data = self.get_miscellaneous_registers()
 
+            c_w = self.get_current_width_registers()
+
             #publishes strings on topics
             self.pub_force.publish(force_data)
             self.pub_proximity.publish(prox_data)
+            self.pub_width.publish(c_w)
           #  self.pub_misc(misc_data)
 
 
@@ -238,11 +245,12 @@ class Rg2ftModbusROSInterface:
             self.pub_proximity = rospy.Publisher('/gripper_interface/proximity_data/', String, queue_size=1)
             self.pub_force = rospy.Publisher('/gripper_interface/force_torque_data/', String, queue_size=1)
             self.pub_misc = rospy.Publisher('/gripper_interface/misc_data', String, queue_size=1)
+            self.pub_width = rospy.Publisher('/gripper_interface/gripper_width', String, queue_size=1)
             #rospy.init_node('topic_subscriber')
             self.sub_gripper_cmd = rospy.Subscriber('gripper_interface/gripper_cmd/', String ,self.gripper_cmd_handler, queue_size=5)
             publishing_rate_Hz = rospy.Rate(1)
 
-            self.client.write_register(self.proximity_offset_L_addr, 170, unit=self.rg2ft_device_addr)
+            self.client.write_register(self.proximity_offset_L_addr, 190, unit=self.rg2ft_device_addr)
             self.client.write_register(self.proximity_offset_R_addr, 260, unit=self.rg2ft_device_addr)
 
         else:

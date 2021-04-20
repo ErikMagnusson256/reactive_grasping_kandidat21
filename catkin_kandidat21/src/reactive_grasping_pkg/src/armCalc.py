@@ -80,6 +80,9 @@ class UR10_robot_arm:
 
         # TODO TEMP SOLUTION: ONLY MOVES RIGHT aka +x RELATIVE TO GLOABAL SYSTEM
         # points head forward
+        self.read_gripper_translation_rotation()
+        while self.xTranslation == 0 and self.yTranslation == 0 and self.zTranslation == 0:
+            self.read_gripper_translation_rotation()
 
         # gripper orientation points it towards table
         newRx = np.pi / 2
@@ -98,6 +101,10 @@ class UR10_robot_arm:
 
         # TODO TEMP SOLUTION: ONLY MOVES LEFT aka -x RELATIVE TO GLOABAL SYSTEM
         # points head forward
+        self.read_gripper_translation_rotation()
+        while self.xTranslation == 0 and self.yTranslation == 0 and self.zTranslation == 0:
+            self.read_gripper_translation_rotation()
+
 
         # gripper orientation points it towards table
         newRx = np.pi / 2
@@ -117,6 +124,10 @@ class UR10_robot_arm:
         # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
         # points head forward
 
+        self.read_gripper_translation_rotation()
+        while self.xTranslation == 0 and self.yTranslation == 0 and self.zTranslation == 0:
+            self.read_gripper_translation_rotation()
+
         # gripper orientation points it towards table
         newRx = np.pi / 2
         newRy = 0
@@ -134,6 +145,9 @@ class UR10_robot_arm:
 
         # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
         # points head forward
+        self.read_gripper_translation_rotation()
+        while self.xTranslation == 0 and self.yTranslation == 0 and self.zTranslation == 0:
+            self.read_gripper_translation_rotation()
 
         # gripper orientation points it towards table
         newRx = np.pi / 2
@@ -151,6 +165,11 @@ class UR10_robot_arm:
     def depth_compensation_gripper(self, current_width_mm, target_width_mm):
         #Moves the TCP forwards or backwards depending on how gripper is opening/closing
         #Krooks kod
+        radious = 170
+        current_depth_mm = radious - np.sqrt((radious**2 - current_width_mm**2))
+        target_depth_mm = radious - np.sqrt((radious**2 - target_width_mm**2))
+
+        self.execute_movel_cmd(self.xTranslation, self.yTranslation + abs(current_depth_mm - target_depth_mm)*0.001, self.zTranslation, self.Rx, self.Ry, self.Rz)
 
         None
 
@@ -175,6 +194,9 @@ class UR10_robot_arm:
 
         # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
         # points head forward
+        self.read_gripper_translation_rotation()
+        while self.xTranslation == 0 and self.yTranslation == 0 and self.zTranslation == 0:
+            self.read_gripper_translation_rotation()
 
         #gripper orientation points it towards table
         newRx = np.pi/2
@@ -192,6 +214,9 @@ class UR10_robot_arm:
         # same as up function
         # TODO TEMP SOLUTION: ONLY MOVES Z UP RELATIVE TO GLOABAL SYSTEM
         # points head forward
+
+        while self.xTranslation == 0 and self.yTranslation == 0 and self.zTranslation == 0:
+            self.read_gripper_translation_rotation()
 
         # gripper orientation points it towards table
         newRx = np.pi/2
@@ -290,7 +315,7 @@ class UR10_robot_arm:
     # init internal variables and start communication with the arm itself
     # some type of check to see if communication with arm is successfull
     def __init__(self):
-        rospy.init_node('armCtrl_node')
+       # rospy.init_node('armCtrl_node')
        # self.test_tf_grunkor()
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
@@ -310,6 +335,11 @@ class UR10_robot_arm:
 
         self.script_cmd_publishers = rospy.Publisher('/ur_hardware_interface/script_command', String, queue_size=1)
 
+        while self.xTranslation == 0 and self.yTranslation == 0 and self.zTranslation == 0:
+            self.read_gripper_translation_rotation()
+
 if __name__ == '__main__':
-    arm = UR10_robot_arm()
-    arm.move_forward_test_150_mm()
+    rospy.init_node('test_depth_comp')
+    arm1 = UR10_robot_arm()
+    arm1.move_square_200_mm()
+
