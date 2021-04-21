@@ -36,7 +36,7 @@ class UR10_robot_arm:
 
             a=tf_conversions.transformations.euler_from_quaternion((trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w))
 
-            print('A',np.trunc(np.rad2deg(a)))
+            #print('A',np.trunc(np.rad2deg(a)))
             #roll pitch yaw
             '''self.Rx,self.Ry, self.Rz = tf_conversions.transformations.euler_from_quaternion((trans.transform.rotation.x,
                                                                 trans.transform.rotation.y,
@@ -64,9 +64,16 @@ class UR10_robot_arm:
             self.direction_normal = v_r
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-            print('not found trans yet')
+            # print('not found trans yet')
+            None
 
-
+    # TODO proper comment, returns true when close enough to pos, pos in meter
+    def is_at_position(self, x, y, z, Rx, Ry, Rz, tol_mm, tol_rad):
+        self.read_gripper_translation_rotation()
+        if math.isclose(self.xTranslation, x, abs_tol=tol_mm) and math.isclose(self.yTranslation, y, abs_tol=tol_mm*0.001) and math.isclose(self.zTranslation, z, abs_tol=tol_mm*0.001) and math.isclose(self.Rx, Rx, abs_tol=tol_rad*0.001) and math.isclose(self.Ry, Ry, abs_tol=tol_rad*0.001) and math.isclose(self.Rz, z, abs_tol=tol_rad):
+            return True
+        else:
+            return False
 
     # For now, move_gripper_R will move the arm in the direction of the finger marked R
     def move_gripper_R(self, distance_mm):
@@ -161,6 +168,8 @@ class UR10_robot_arm:
 
         self.execute_movel_cmd(newX, newY, newZ, newRx, newRy, newRz)
 
+    def move_position(self, x, y, z, Rx, Ry, Rz):
+        self.execute_movel_cmd(x, y, z, Rx, Ry, Rz)
 
     def depth_compensation_gripper(self, current_width_mm, target_width_mm):
         #Moves the TCP forwards or backwards depending on how gripper is opening/closing
@@ -169,7 +178,7 @@ class UR10_robot_arm:
         current_depth_mm = radious - np.sqrt((radious**2 - current_width_mm**2))
         target_depth_mm = radious - np.sqrt((radious**2 - target_width_mm**2))
 
-        self.execute_movel_cmd(self.xTranslation, self.yTranslation + abs(current_depth_mm - target_depth_mm)*0.001, self.zTranslation, self.Rx, self.Ry, self.Rz)
+        self.execute_movel_cmd(self.xTranslation, self.yTranslation + current_depth_mm*0.001 - target_depth_mm*0.001, self.zTranslation, self.Rx, self.Ry, self.Rz)
 
         None
 

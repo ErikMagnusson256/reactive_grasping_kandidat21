@@ -68,7 +68,6 @@ class ForceCalcClass:
 
     def slip_detect(self):
         #rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
-
         if (np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)) > abs((self.get_F_z_L() * 0.5))) or (
                 np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)) > abs((self.get_F_z_R() * 0.5))):
             print('Caught me slipping')

@@ -184,8 +184,8 @@ class Rg2ftModbusROSInterface:
 
 
     def opeate_grippper_release(self):
-        self.operate_gripper(80, 10)
-        self.current_force = 10
+        self.operate_gripper(100, 20)
+        self.current_force = 20
         return True
 
     # def set_current_force(self, last_force_command):
