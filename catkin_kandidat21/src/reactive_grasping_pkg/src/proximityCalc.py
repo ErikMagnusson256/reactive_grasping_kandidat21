@@ -14,54 +14,94 @@ import armCalc
 from forceCalc import ForceCalcClass
 
 
-
-# Decodes the data that has been retrived from registers
-def validator_int16(instance):
-    if not instance.isError():
-        '''.isError() implemented in pymodbus 1.4.0 and above.'''
-        decoder = BinaryPayloadDecoder.fromRegisters(
-            instance.registers,
-            byteorder=Endian.Big, wordorder=Endian.Little
-        )
-        return float('{0:.2f}'.format(decoder.decode_16bit_int()))
-
-    else:
-        # Error handling.
-        print("There isn't the registers, Try again.")
-        return None
-
-
+'''
+Class with helper function to handle proximity logic when starting a grasp sequence
+'''
 class ProximityCalcClass:
+    '''
+    Reads data from a topic, saves it internally for later use
 
+    Paramters
+        self
+        msg - data that has been published on a topic and now being read
+    Returns
+        None
+    Throws
+        None
+    '''
     def prox_data_handler(self, msg):
-
         self.current_msg = msg.data
-        #print('current msg prox handler:', self.current_msg)
 
+    '''
+        Reads data from a topic, saves it internally for later use
+
+        Paramters
+            self
+            msg - data that has been published on a topic and now being read
+        Returns
+            None
+        Throws
+            None
+        '''
     def width_data_handler(self, wmsg):
-
         self.current_wmsg = wmsg.data
 
+    '''
+        Reads data from a topic, saves it internally for later use
+
+        Paramters
+            self
+            
+        Returns
+            width/10 - current gripper width in mm
+        Throws
+            None
+        '''
     def get_width(self):
         width = int(self.current_wmsg)
         return width/10
 
-# Get Proximity reading from left finger from gripperinterface publisher
-# read string and splice out relevant data.
+
+    '''
+    Splices left proximity value from the msg that was saved earlier
+    
+    Parameters
+        self
+    Returns
+        proxL - left proximity value
+    Throws
+        None
+    '''
     def get_prox_L(self):
         proxL = self.current_msg.split('=', )[2].split(']')[0]
-
-
-    #return mainController.validator_16(proxL)
         return float(proxL)
 
+    '''
+        Splices right proximity value from the msg that was saved earlier
 
-# Get proximity reading from right finger
+        Parameters
+            self
+        Returns
+            proxR - right proximity value
+        Throws
+            None
+        '''
     def get_prox_R(self):
         proxR = self.current_msg.split('=', )[1].split(',')[0]
         return float(proxR) #in mm
-   #  return mainController.validator_16(proxR)
-
+   '''
+   TODO
+   Make sure that an object is being gripped
+   Actutates the arm to center the object between fingers
+   Closes the gripper 
+   Parameters
+        self
+        tolerance
+    Returns
+        True - TODO
+    Throws
+        None
+   '''
  #  Check if Proximity readings match within tolerance, if not adjust position
     # TODO This needs to access ROS node for controlling the arm to adjust position
     def prox_check(self, tolerance):
@@ -113,6 +153,18 @@ class ProximityCalcClass:
             arm.move_gripper_R(2)
             time.sleep(0.75)
 
+    '''
+    Constructor, called each time a new instance of this class is created
+    Sets internal variables
+    Creates publishers and subscribers
+    sets internal tolerance
+    Parameters
+        self
+    Returns
+        None
+    Throws
+        None
+    '''
     def __init__(self):
         self.current_msg = '[proximity_value_R=300,proximity_value_L=550]'
         self.tolerance_mm = 40
@@ -121,19 +173,9 @@ class ProximityCalcClass:
 
 
 def main():
-    #rospy.init_node('topic_subscriber')
-    #proximity_sub = rospy.Subscriber('/gripper_interface/proximity_data/', String, prox_data_handler) # listens to a topic and calls prox_data_handler
-    #rospy.spin()
 
-    #while True:
-     #   print('prox l:', get_prox_L(), ' prox r:', get_prox_R())
-    #test = ProximityCalcClass()
-    #test.get_prox_L()
     None
 
 
 if __name__ == '__main__':
     main()
-    #print('prox R ', get_prox_R())
-    #print('prox L ', get_prox_L())
-    #prox_check()

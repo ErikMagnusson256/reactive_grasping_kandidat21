@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# TODO comments and bös
+
 import numpy as np
 
 #from proximityCalc import ProximityCalcClass
@@ -12,13 +12,15 @@ import time
 import rospy
 from std_msgs.msg import String
 from pymodbus.payload import BinaryPayloadDecoder
-
+'''
+Test sequence - centers the fingers around an object, closes the gripper and starts to grip
+while gripping it checks for slippage
+'''
 def stage_test():
     # add whatever you want to try, be smart about the order
     armm = armCalc.UR10_robot_arm()
 
     pub_cmd_maincontroller = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
-
 
     #test to see hwo to send just one msg
     while not rospy.is_shutdown():
@@ -51,7 +53,16 @@ def stage_test():
         time.sleep(5)
 
 
-
+'''
+Method representing the grip sequence, centers the fingers around the object and closes the fingers so that a basic grasp is being established
+Starts by opening the gripper
+Paramters
+    tolerance - different objects could need a seperate tolerance in when grasping due to material differance
+Returns
+    None
+Throws
+    None
+'''
 def grip_sequence(tolerance):
     pub_cmd_maincontroller = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
 
@@ -66,7 +77,6 @@ def grip_sequence(tolerance):
         else:
             time.sleep(0.1)
 
-
     proximityLogic = proximityCalc.ProximityCalcClass()
 
     while not proximityLogic.prox_check(tolerance):
@@ -76,6 +86,18 @@ def grip_sequence(tolerance):
     print('proximity done')
     time.sleep(0.5)
 
+'''
+Makes sure object doesn't slip, adjusts force and width to ensure not dropping it
+WARNING MAY CAUSE DAMAGE TO OBJECT BY GRIPPING TOO HARD
+
+Parameters
+    None
+Returns
+    True 
+    False
+Throws
+    None
+'''
 def slip_check():
     forceLogic = ForceCalcClass()
     while not forceLogic.slip_detect():
@@ -85,6 +107,17 @@ def slip_check():
 
     return forceLogic.slip_detect()
 
+'''
+Opens the gripper fully to 100 mm
+
+Parameters
+    None
+Returns
+    None
+Throws
+    None
+
+'''
 def gripper_release():
     pub_cmd_maincontroller = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
 
@@ -99,7 +132,10 @@ def gripper_release():
         else:
             time.sleep(0.1)
 
-
+'''
+Test method to see how well arm movement can be executed and at the same time ensure that the arm is at position
+Moves arm between two points without using any timers
+'''
 def test_arm_pos():
     arm = armCalc.UR10_robot_arm()
 
@@ -266,16 +302,23 @@ def stage_8():
 if __name__ == '__main__':
 
     rospy.init_node('talker_maincontroller', anonymous=True)
-    stage_0()
-    stage_1()
-    stage_2()
-    stage_3()
-    stage_4()
-    stage_5()
-    stage_6()
-    stage_7()
-    stage_8()
-    #test_arm_pos()
+    '''
+    Executes a task contianing several sub tasks
+    Each stage either grips an object, moves the arm or adjusts for slipping
+    These stages are hardcoded using measured positions in the lab
+    
+    This sequence tries to grip three types of objects at an approximate position and drops them off at a known location
+    The approximate position allows our controlling algorithms to make final small adjustments to grasp the object
+    '''
+    stage_0() #moves to the cup position and positions the fingers approximatly around the cup, gripps the cup
+    stage_1() #moves the cup up 100 mm,checks for slip and adjusts
+    stage_2() #drops off the cup at dropoff position, checks for slip and adjusts while moving
+    stage_3() #moves to the approximate weight position, places the fingers roughly around the object, makes small adjustments and grips the weight
+    stage_4() #moves the weight up 100 mm,checks for slip and adjusts
+    stage_5() #drops off the weight dropoff position, checks for slip and adjusts while moving
+    stage_6() #moves to the approximate weight position, places the fingers roughly around the object, makes small adjustments and grips the weight
+    stage_7() #moves the wood up 100 mm,checks for slip and adjusts
+    stage_8() #drops off the wood at dropoff position, checks for slip and adjusts while moving
 
 class MainController:
 
