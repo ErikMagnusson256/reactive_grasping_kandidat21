@@ -11,28 +11,33 @@ import numpy as np
 from gripperInterface import Rg2ftModbusROSInterface as gripperInterface1
 
 
-#remove this later
-def validator_int16(instance):
-    if not instance.isError():
-        '''.isError() implemented in pymodbus 1.4.0 and above.'''
-        decoder = BinaryPayloadDecoder.fromRegisters(
-            instance.registers,
-            byteorder=Endian.Big, wordorder=Endian.Little
-        )
-        return float('{0:.2f}'.format(decoder.decode_16bit_int()))
-
-    else:
-        # Error handling.
-        print("There isn't the registers, Try again.")
-        return None
-
+'''
+Class with helper functions to check slippage and then react to slippage by actuating the gripper
+'''
 class ForceCalcClass:
-
+    '''
+    Callback function that saves data that have been published on
+    Parameters
+        self
+        msg - data that have been read from a topic
+    Returns
+        None
+    Throws
+        None
+    '''
     def force_torque_data_handler(self, msg):
         self.current_msg = msg.data
-        #print(self.current_msg)
-        #print(self.get_F_z_L())
 
+    '''
+    function that splices the Right force sensor data in X from a string
+    
+    Parameters
+        self
+    Returns
+        force in right the right sensor in X dimension
+    Throws
+        None
+    '''
     def get_F_x_R(self):
         f_x_R = self.current_msg.split('=', 1)[1].split(',')[0]
         return int(f_x_R)
@@ -66,6 +71,17 @@ class ForceCalcClass:
         finally:
             return self.get_F_z_R()
 
+    '''
+    helper function that can be called for to detect and react to slippage
+    
+    Parameters
+        self
+    Returns
+        True - slip has been detected and reacted to
+        False - no slip detected
+    Throws
+        None
+    '''
     def slip_detect(self):
         #rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
         if (np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)) > abs((self.get_F_z_L() * 0.5))) or (
@@ -79,6 +95,20 @@ class ForceCalcClass:
         else:
             return False, print('All good')
 
+    '''
+    TODO fix send single msg
+    
+    Function that reacts to slip by increasing gripping force and decreasing gripper width
+    Createsa publisher to send cmd
+    then sends cmd to actuate gripper
+    
+    Parameters
+        self
+    Returns
+        None
+    Throws
+        None
+    '''
     def slip_react(self):
         # gripperInterface1.operate_gripper_step_force(0.1)
         pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
@@ -87,6 +117,11 @@ class ForceCalcClass:
         pub_cmd_forcecalc.publish('operate_gripper_step_width(5)')
         time.sleep(0.05)
 
+    '''
+    Constructor, called each time new instance of object is created
+    creates a subscriber to force data
+    creates a variabe to store msgs that are being published on topic
+    '''
     def __init__(self):
         self.current_msg = '[F_x_R=1,F_y_R=2,F_z_R=5,F_x_L=1,F_y_L=2,F_z_L=1]'
         rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
@@ -94,29 +129,8 @@ class ForceCalcClass:
 
 
 def main():
-    #rospy.init_node('topic_subscriber')
-  #  force_torque_sub = rospy.Subscriber('/gripper_interface/force_torque_data/', String, force_torque_data_handler)  # listens to a topic and calls prox_data_handler
-    #rospy.spin()
-
-    # while True:
-    #     print("fxr:", get_F_x_R())
-    #     print("fyr:", get_F_y_R())
-    #     print("fzr:", get_F_z_R())
-    #     print("fxl:", get_F_x_L())
-    #     print("fyl:", get_F_y_L())
-    #     print("fzl:", get_F_z_L())
-    #     slip_detect()
-    #     time.sleep(1)
-    forceLogic = ForceCalcClass()
-    forceLogic.get_F_z_L()
+    None
 
 
 if __name__ == '__main__':
     main()
-    # print("fxr:",get_F_x_R())
-    # print("fyr:",get_F_y_R())
-    # print("fzr:", get_F_z_R())
-    # print("fxl:", get_F_x_L())
-    # print("fyl:",get_F_y_L())
-    # print("fzl:",get_F_z_L())
-    # slip_detect()
