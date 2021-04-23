@@ -70,7 +70,7 @@ class UR10_robot_arm:
     # TODO proper comment, returns true when close enough to pos, pos in meter
     def is_at_position(self, x, y, z, Rx, Ry, Rz, tol_mm, tol_rad):
         self.read_gripper_translation_rotation()
-        if math.isclose(self.xTranslation, x, abs_tol=tol_mm) and math.isclose(self.yTranslation, y, abs_tol=tol_mm*0.001) and math.isclose(self.zTranslation, z, abs_tol=tol_mm*0.001) and math.isclose(self.Rx, Rx, abs_tol=tol_rad*0.001) and math.isclose(self.Ry, Ry, abs_tol=tol_rad*0.001) and math.isclose(self.Rz, z, abs_tol=tol_rad):
+        if math.isclose(self.xTranslation, x, abs_tol=tol_mm*0.001) and math.isclose(self.yTranslation, y, abs_tol=tol_mm*0.001) and math.isclose(self.zTranslation, z, abs_tol=tol_mm*0.001) and math.isclose(self.Rx, Rx, abs_tol=tol_rad) and math.isclose(self.Ry, Ry, abs_tol=tol_rad) and math.isclose(self.Rz, Rz, abs_tol=tol_rad):
             return True
         else:
             return False

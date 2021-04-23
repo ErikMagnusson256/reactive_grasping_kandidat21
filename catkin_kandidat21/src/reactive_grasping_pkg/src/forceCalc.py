@@ -74,7 +74,7 @@ class ForceCalcClass:
             print(np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)), '>', (self.get_F_z_L() * 0.5))
             print(np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)), '>', (self.get_F_z_R() * 0.5))
             self.slip_react()
-            time.sleep(0.05)
+            time.sleep(0.1)
             return True
         else:
             return False, print('All good')
@@ -85,6 +85,7 @@ class ForceCalcClass:
         # rospy.init_node('talkerdffdf', anonymous=True)
         pub_cmd_forcecalc.publish('operate_gripper_step_force(5)')
         pub_cmd_forcecalc.publish('operate_gripper_step_width(5)')
+        time.sleep(0.05)
 
     def __init__(self):
         self.current_msg = '[F_x_R=1,F_y_R=2,F_z_R=5,F_x_L=1,F_y_L=2,F_z_L=1]'

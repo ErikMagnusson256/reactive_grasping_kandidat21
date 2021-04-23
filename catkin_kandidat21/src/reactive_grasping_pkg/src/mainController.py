@@ -52,7 +52,7 @@ def stage_test():
 
 
 
-def grip_sequence(tolerance):
+def grip_sequence(tolerance, solid):
     pub_cmd_maincontroller = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
 
     # test to see hwo to send just one msg
@@ -69,9 +69,9 @@ def grip_sequence(tolerance):
 
     proximityLogic = proximityCalc.ProximityCalcClass()
 
-    while not proximityLogic.prox_check(tolerance):
+    while not proximityLogic.prox_check(tolerance, solid):
         time.sleep(0.1)
-        proximityLogic.prox_check(tolerance)
+        proximityLogic.prox_check(tolerance, solid)
 
     print('proximity done')
     time.sleep(0.5)
@@ -121,12 +121,12 @@ def stage_0():
     gripper_release()
     arm = armCalc.UR10_robot_arm()
     arm.move_position(0.0857, -0.7475, 0.0401, np.pi/2, 0, 0)
-    while not arm.is_at_position(0.0857, -0.7475, 0.0401, np.pi/2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.0857, -0.7475, 0.0331, np.pi/2, 0, 0, 10, 0.1):
         continue
     arm.move_gripper_forwards(55)
-    while not arm.is_at_position(0.0857, -0.7475 - 0.055, 0.0401, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.0857, -0.7475 - 0.055, 0.0331, np.pi / 2, 0, 0, 10, 0.1):
         continue
-    grip_sequence(40)
+    grip_sequence(25, False)
     print('stage0 complete')
     None
 
@@ -136,7 +136,7 @@ def stage_1():
     arm = armCalc.UR10_robot_arm()
 
     arm.move_gripper_up(100)
-    while not arm.is_at_position(0.0857, -0.7475 - 0.055, 0.0401 + 0.1, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.0857, -0.7475 - 0.055, 0.0401 + 0.1, np.pi / 2, 0, 0, 30, 0.5):
         print('not at pos yo')
         slip_check()
 
@@ -148,14 +148,14 @@ def stage_2():
     arm = armCalc.UR10_robot_arm()
 
     arm.move_position(-0.6044, -0.8730, 0.0401, np.pi/2, 0, 0)
-    while not arm.is_at_position(-0.6044, -0.8730, 0.0401, np.pi / 2, 0, 0, 50, 0.1):
+    while not arm.is_at_position(-0.6044, -0.8730, 0.0401, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     gripper_release()
     time.sleep(1)
 
     arm.move_gripper_backwards(100)
-    while not arm.is_at_position(-0.6044, -0.8730 + 0.1, 0.0401, np.pi / 2, 0, 0, 50, 0.1):
+    while not arm.is_at_position(-0.6044, -0.8730 + 0.1, 0.0401, np.pi / 2, 0, 0, 50, 0.5):
         continue
 
     print('stage2 complete')
@@ -163,36 +163,37 @@ def stage_2():
 
 def stage_3():
     # go to tyngd b4 pickup, move forward, grip sequence
+    print('going to tygnd')
     gripper_release()
     arm = armCalc.UR10_robot_arm()
 
     arm.move_position(0.2724, -0.7581, 0.0120, np.pi/2, 0, 0)
-    while not arm.is_at_position(0.2724, -0.7581, 0.0120, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.2724, -0.7581, 0.0120, np.pi / 2, 0, 0, 10, 0.5):
+        print('not at pos')
         continue
-
+    print('at tynngd')
     arm.move_gripper_forwards(55)
 
-    while not arm.is_at_position(0.2724, -0.7581 - 0.055, 0.0120, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.2724, -0.7581 - 0.055, 0.0120, np.pi / 2, 0, 0, 10, 0.5):
         continue
 
-    grip_sequence(5)
+    grip_sequence(5, True)
     print('stage3 complete')
     None
 
 def stage_4():
     # lift and check slip, do what stage 1 does
     arm = armCalc.UR10_robot_arm()
+    x = arm.xTranslation
+    y = arm.yTranslation
+    z = arm.zTranslation
+
     arm.move_gripper_up(10)
-    while not arm.is_at_position(0.2724, -0.7581 - 0.055, 0.0120 + 0.01, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(x, y, z + 0.01, np.pi / 2, 0, 0, 20, 0.5):
         slip_check()
-    arm.move_gripper_up(10)
-    while not arm.is_at_position(0.2724, -0.7581 - 0.055, 0.0120 + 0.02, np.pi / 2, 0, 0, 10, 0.1):
-        slip_check()
-    arm.move_gripper_up(10)
-    while not arm.is_at_position(0.2724, -0.7581 - 0.055, 0.0120 + 0.03, np.pi / 2, 0, 0, 10, 0.1):
-        slip_check()
-    arm.move_gripper_up(70)
-    while not arm.is_at_position(0.2724, -0.7581 - 0.055, 0.0120 + 0.1, np.pi / 2, 0, 0, 10, 0.1):
+    time.sleep(3)
+    arm.move_gripper_up(100)
+    while not arm.is_at_position(x, y, z + 0.1, np.pi / 2, 0, 0, 20, 0.5):
         slip_check()
 
     print('stage4 complete')
@@ -204,13 +205,13 @@ def stage_5():
     arm.move_position(-0.6044, -0.8730, 0.0277, np.pi/2, 0, 0)
 
 
-    while not arm.is_at_position(-0.6044, -0.8730, 0.0277, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(-0.6044, -0.8730, 0.0277, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     gripper_release()
     time.sleep(1)
     arm.move_gripper_backwards(100)
-    while not arm.is_at_position(-0.6044, -0.8730 + 0.1, 0.0277, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(-0.6044, -0.8730 + 0.1, 0.0277, np.pi / 2, 0, 0, 10, 0.5):
         continue
 
     print('stage5 complete')
@@ -220,16 +221,17 @@ def stage_6():
     # go to trä, do stage 3
     arm = armCalc.UR10_robot_arm()
     arm.move_position(0.4472, -0.7139, 0.0638, np.pi / 2, 0, 0)
-    while not arm.is_at_position(0.4472, -0.7139, 0.0638, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.4472, -0.7139, 0.0638, np.pi / 2, 0, 0, 10, 0.5):
         continue
 
 
     arm.move_gripper_forwards(95)
 
-    while not arm.is_at_position(0.4472, -0.7139 - 0.095, 0.0638, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.4472, -0.7139 - 0.095, 0.0638, np.pi / 2, 0, 0, 10, 0.5):
+        print('not in pos')
         continue
 
-    grip_sequence(30)
+    grip_sequence(30, False)
     print('stage6 complete')
     None
 
@@ -238,7 +240,7 @@ def stage_7():
     arm = armCalc.UR10_robot_arm()
     arm.move_gripper_up(100)
 
-    while not arm.is_at_position(0.4472, -0.7139 - 0.095, 0.0638 + 0.1, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.4472, -0.7139 - 0.095, 0.0638 + 0.1, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     print('stage7 complete')
@@ -249,7 +251,7 @@ def stage_8():
     arm = armCalc.UR10_robot_arm()
     arm.move_position(-0.6044, -0.8730, 0.0638, np.pi/2, 0, 0)
 
-    while not arm.is_at_position(-0.6044, -0.8730, 0.0638, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(-0.6044, -0.8730, 0.0638, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     gripper_release()
@@ -257,7 +259,7 @@ def stage_8():
 
     arm.move_gripper_backwards(100)
 
-    while not arm.is_at_position(-0.6044, -0.8730 + 0.1, 0.0638, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(-0.6044, -0.8730 + 0.1, 0.0638, np.pi / 2, 0, 0, 10, 0.5):
         continue
 
     print('stage8 complete')

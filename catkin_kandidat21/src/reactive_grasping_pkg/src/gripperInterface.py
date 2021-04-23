@@ -115,7 +115,7 @@ class Rg2ftModbusROSInterface:
 
 
             #TODO fix
-            time.sleep(1)
+            time.sleep(0.9)
 
         self.client.close()
 
