@@ -172,6 +172,14 @@ class Rg2ftModbusROSInterface:
     def run(self):
 
         while not rospy.is_shutdown():
+
+            #waits for the gripper to execute commands before starting to read data
+            while self.is_writing_registers:
+                continue
+
+            # icurrently reading data from registers, don't want to accidentaly write to them at the same time
+            self.is_reading_registers = True
+
             # Reads from registers and turns them into strings
             force_data = self.get_force_registers()
             prox_data = self.get_proximity_registers()
@@ -184,6 +192,7 @@ class Rg2ftModbusROSInterface:
             self.pub_width.publish(c_w)
             #  self.pub_misc(misc_data)
 
+            self.is_reading_registers = False
             #TODO fix
             time.sleep(0.9)
 
@@ -300,6 +309,10 @@ class Rg2ftModbusROSInterface:
         None
     '''
     def get_current_width(self):
+        # waits for reading registers to be done before writing things
+        while self.is_reading_registers:
+            continue
+
         current_width = int(validator_int16(self.client.read_holding_registers(self.gripper_width_addr, 1, unit=self.rg2ft_device_addr))/10)
         time.sleep(0.05)
         return current_width
@@ -318,6 +331,13 @@ class Rg2ftModbusROSInterface:
         None
     '''
     def operate_gripper(self,grip_width_mm, grip_force_N):
+
+        #waits for reading registers to be done before writing things
+        while self.is_reading_registers:
+            continue
+
+        self.is_writing_registers = True
+
         # 1 wait for gripper to not be busy
         while (self.client.read_holding_registers(self.gripper_busy_addr, 1, unit=self.rg2ft_device_addr)) == 1:
             time.sleep(0.05)
@@ -339,6 +359,7 @@ class Rg2ftModbusROSInterface:
         while (self.client.read_holding_registers(self.gripper_busy_addr, 1, unit=self.rg2ft_device_addr)) == 1:
             time.sleep(0.05)
 
+        self.is_writing_registers = False
         #grip executed successfully
         return True
 
@@ -365,6 +386,9 @@ class Rg2ftModbusROSInterface:
         self.client = ModbusClient(box_ip, port=502)  # Creates a client in this program that uses the box ip and port 502 (as per standard for modbus)
         return_val = self.client.connect()  # Tries to connect to the computebox
         print("Established connection to compute box?: ", return_val)  # prints in console if a connection is established
+
+        self.is_reading_registers = False
+        self.is_writing_registers = False
         if return_val:
             # init publishers
             #rospy = rospy
