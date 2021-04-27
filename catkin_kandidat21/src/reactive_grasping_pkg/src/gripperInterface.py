@@ -101,11 +101,17 @@ class Rg2ftModbusROSInterface:
         None
     '''
     def get_proximity_registers(self):
-        prox_val_L = validator_int16(self.client.read_holding_registers(self.proximity_value_L_addr, 1, unit=self.rg2ft_device_addr))
-        #print('offset for L', validator_int16(self.client.read_holding_registers(self.proximity_offset_L_addr, 1, unit = self.rg2ft_device_addr)))
-        prox_val_R = validator_int16(self.client.read_holding_registers(self.proximity_value_R_addr, 1, unit=self.rg2ft_device_addr))
-
-        return '[proximity_value_R='+str(prox_val_R)+',proximity_value_L='+str(prox_val_L)+']'
+        try:
+            prox_val_L = validator_int16(
+                self.client.read_holding_registers(self.proximity_value_L_addr, 1, unit=self.rg2ft_device_addr))
+            prox_val_R = validator_int16(
+                self.client.read_holding_registers(self.proximity_value_R_addr, 1, unit=self.rg2ft_device_addr))
+            self.last_prox_L = prox_val_L
+            self.last_prox_R = prox_val_R
+            return '[proximity_value_R='+str(prox_val_R)+',proximity_value_L='+str(prox_val_L)+']'
+        except:
+            print('Could not read proximity registers, using last known values R L:', self.last_prox_R, self.last_prox_L)
+            return '[proximity_value_R='+str(self.last_prox_R)+',proximity_value_L='+str(self.last_prox_L)+']'
 
     '''
        Reads current gripper width data from RG2-FT gripper through modbus and then saves the data in a string
@@ -118,9 +124,14 @@ class Rg2ftModbusROSInterface:
             None
     '''
     def get_current_width_registers(self):
-
-        current_width = validator_int16(self.client.read_holding_registers(self.gripper_width_addr, 1, unit = self.rg2ft_device_addr))
-        return str(current_width)
+        try:
+            current_width = validator_int16(
+                self.client.read_holding_registers(self.gripper_width_addr, 1, unit=self.rg2ft_device_addr)) / 10
+            self.last_current_width = current_width
+            return str(current_width)
+        except:
+            print('Could not retrive current width, using last known current width:', self.last_current_width)
+            return self.last_current_width
 
     '''
        Reads force data from RG2-FT gripper through modbus and then saves the data in a string
@@ -134,14 +145,29 @@ class Rg2ftModbusROSInterface:
         '''
     def get_force_registers(self):
         # TODO add torque  readings later on
+        try:
+            F_x_R = validator_int16(self.client.read_holding_registers(self.F_x_R_addr, 1, unit=self.rg2ft_device_addr))
+            F_y_R = validator_int16(self.client.read_holding_registers(self.F_y_R_addr, 1, unit=self.rg2ft_device_addr))
+            F_z_R = validator_int16(self.client.read_holding_registers(self.F_z_R_addr, 1, unit=self.rg2ft_device_addr))
+            F_x_L = validator_int16(self.client.read_holding_registers(self.F_x_L_addr, 1, unit=self.rg2ft_device_addr))
+            F_y_L = validator_int16(self.client.read_holding_registers(self.F_y_L_addr, 1, unit=self.rg2ft_device_addr))
+            F_z_L = validator_int16(self.client.read_holding_registers(self.F_z_L_addr, 1, unit=self.rg2ft_device_addr))
 
-        F_x_R = validator_int16(self.client.read_holding_registers(self.F_x_R_addr, 1, unit=self.rg2ft_device_addr))
-        F_y_R = validator_int16(self.client.read_holding_registers(self.F_y_R_addr, 1, unit=self.rg2ft_device_addr))
-        F_z_R = validator_int16(self.client.read_holding_registers(self.F_z_R_addr, 1, unit=self.rg2ft_device_addr))
-        F_x_L = validator_int16(self.client.read_holding_registers(self.F_x_L_addr, 1, unit=self.rg2ft_device_addr))
-        F_y_L = validator_int16(self.client.read_holding_registers(self.F_y_L_addr, 1, unit=self.rg2ft_device_addr))
-        F_z_L = validator_int16(self.client.read_holding_registers(self.F_z_L_addr, 1, unit=self.rg2ft_device_addr))
-        return '[F_x_R=' + str(F_x_R) + ',F_y_R=' + str(F_y_R) + ',F_z_R=' + str(F_z_R) + ',F_x_L=' + str(F_x_L) + ',F_y_L=' + str(F_y_L) + ',F_z_L=' + str(F_z_L)+']'
+            self.last_F_x_R = F_x_R
+            self.last_F_y_R = F_y_R
+            self.last_F_z_R = F_z_R
+            self.last_F_x_L = F_x_L
+            self.last_F_y_L = F_y_L
+            self.last_F_z_L = F_z_L
+
+            return '[F_x_R=' + str(F_x_R) + ',F_y_R=' + str(F_y_R) + ',F_z_R=' + str(F_z_R) + ',F_x_L=' + str(
+                F_x_L) + ',F_y_L=' + str(F_y_L) + ',F_z_L=' + str(F_z_L) + ']'
+        except:
+            print('Could not read force registers, using last known variables F_x_R F_y_R F_z_R F_x_L F_y_L F_z_L:',
+                  self.last_F_x_R, self.last_F_y_R, self.last_F_z_R, self.last_F_x_L, self.last_F_y_L, self.last_F_z_L)
+            return '[F_x_R=' + str(self.last_F_x_R) + ',F_y_R=' + str(self.last_F_y_R) + ',F_z_R=' + \
+                   str(self.last_F_z_R) + ',F_x_L=' + str(self.last_F_x_L) + ',F_y_L=' + str(self.last_F_y_L) + \
+                   ',F_z_L=' + str(self.last_F_z_L) + ']'
 
     '''
     @TODO 
@@ -172,7 +198,7 @@ class Rg2ftModbusROSInterface:
     def run(self):
 
         while not rospy.is_shutdown():
-
+            time1 = time.time()
             #waits for the gripper to execute commands before starting to read data
             while self.is_writing_registers:
                 continue
@@ -194,7 +220,22 @@ class Rg2ftModbusROSInterface:
 
             self.is_reading_registers = False
             #TODO fix
-            time.sleep(0.9)
+            time2 = time.time()
+
+            dt = 1/self.wanted_hz
+            delta_dt = dt - (time2 - time1)
+            if delta_dt < 0:
+                delta_dt = 0
+            time.sleep(delta_dt)
+
+
+
+
+
+            print('delta t:', time2 - time1, 'now sleeping:', delta_dt, 'seconds')
+
+            if time2 - time1 > 1:
+                print('ERROR WATING MOER THAN 1s', time2 - time1)
 
         self.client.close()
 
@@ -309,15 +350,14 @@ class Rg2ftModbusROSInterface:
         None
     '''
     def get_current_width(self):
-        # waits for reading registers to be done before writing things
-        while self.is_reading_registers:
-            continue
-
-        current_width = int(validator_int16(self.client.read_holding_registers(self.gripper_width_addr, 1, unit=self.rg2ft_device_addr))/10)
-        time.sleep(0.05)
-        return current_width
-
-
+        try:
+            current_width = int(validator_int16(
+                self.client.read_holding_registers(self.gripper_width_addr, 1, unit=self.rg2ft_device_addr)) / 10)
+            self.last_current_width = current_width
+            return int(current_width)
+        except:
+            print('Could not retrive current width, using last known current width:', self.last_current_width)
+            return self.last_current_width
 
     '''
     Actuates the gripper by writing data to certain registers in the gripper, is done through modbus
@@ -340,7 +380,7 @@ class Rg2ftModbusROSInterface:
 
         # 1 wait for gripper to not be busy
         while (self.client.read_holding_registers(self.gripper_busy_addr, 1, unit=self.rg2ft_device_addr)) == 1:
-            time.sleep(0.05)
+            continue
 
         # 2 set target width and force in registers, multiply with ten to convert it to data that the gripper understands
         self.client.write_register(self.target_width_addr, grip_width_mm*10, unit=self.rg2ft_device_addr)
@@ -357,7 +397,7 @@ class Rg2ftModbusROSInterface:
 
         # 4 wait for gripper to not be busy
         while (self.client.read_holding_registers(self.gripper_busy_addr, 1, unit=self.rg2ft_device_addr)) == 1:
-            time.sleep(0.05)
+            continue
 
         self.is_writing_registers = False
         #grip executed successfully
@@ -379,13 +419,25 @@ class Rg2ftModbusROSInterface:
         None
     '''
     def __init__(self):
-
-        self.current_force = 0
+        self.wanted_hz = 40
+        self.current_force = 3
 
         box_ip = "192.168.1.1"  # OnRobot computebox IP address
-        self.client = ModbusClient(box_ip, port=502)  # Creates a client in this program that uses the box ip and port 502 (as per standard for modbus)
+        self.client = ModbusClient(box_ip, port=502, timeout=0.5)  # Creates a client in this program that uses the box ip and port 502 (as per standard for modbus)
         return_val = self.client.connect()  # Tries to connect to the computebox
         print("Established connection to compute box?: ", return_val)  # prints in console if a connection is established
+
+        #save the last retrived data to send incase read failed this time
+        self.last_current_width = -1
+        self.last_prox_L = -1
+        self.last_prox_R = -1
+        self.last_F_x_R = -1
+        self.last_F_x_L = -1
+        self.last_F_y_R = -1
+        self.last_F_y_L = -1
+        self.last_F_z_R = -1
+        self.last_F_z_L = -1
+
 
         self.is_reading_registers = False
         self.is_writing_registers = False
@@ -398,7 +450,7 @@ class Rg2ftModbusROSInterface:
             self.pub_misc = rospy.Publisher('/gripper_interface/misc_data', String, queue_size=1)
             self.pub_width = rospy.Publisher('/gripper_interface/gripper_width', String, queue_size=1)
             #rospy.init_node('topic_subscriber')
-            self.sub_gripper_cmd = rospy.Subscriber('gripper_interface/gripper_cmd/', String ,self.gripper_cmd_handler, queue_size=5)
+            self.sub_gripper_cmd = rospy.Subscriber('gripper_interface/gripper_cmd/', String ,self.gripper_cmd_handler, queue_size=1)
             publishing_rate_Hz = rospy.Rate(1)
 
             #dubblecheck that offset values are right

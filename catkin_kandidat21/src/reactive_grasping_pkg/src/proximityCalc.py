@@ -59,7 +59,7 @@ class ProximityCalcClass:
         '''
     def get_width(self):
         width = int(self.current_wmsg)
-        return width/10
+        return width
 
 
     '''
@@ -98,20 +98,9 @@ class ProximityCalcClass:
             return float(proxR)
         except TypeError:
             print('EXCEPTION', proxR)
-        return float(proxR) #in mm
-   '''
-   TODO
-   Make sure that an object is being gripped
-   Actutates the arm to center the object between fingers
-   Closes the gripper 
-   Parameters
-        self
-        tolerance
-    Returns
-        True - TODO
-    Throws
-        None
-   '''
+
+        return float(proxR)
+    
  #  Check if Proximity readings match within tolerance, if not adjust position
     # TODO This needs to access ROS node for controlling the arm to adjust position
     def prox_check(self, tolerance, solid):
@@ -198,7 +187,6 @@ class ProximityCalcClass:
         self.tolerance_mm = 40
         self.proximity_sub = rospy.Subscriber('/gripper_interface/proximity_data/', String, self.prox_data_handler)
         self.width_sub = rospy.Subscriber('/gripper_interface/gripper_width', String, self.width_data_handler)
-
 
 def main():
 
