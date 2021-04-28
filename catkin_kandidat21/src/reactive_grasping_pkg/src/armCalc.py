@@ -250,7 +250,7 @@ class UR10_robot_arm:
             self.read_gripper_translation_rotation()
 
             # gripper orientation points it towards table
-            newRx = np.pi / 2
+        newRx = np.pi / 2
 
         newRy = 0
         newRz = 0

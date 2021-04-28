@@ -86,6 +86,30 @@ def grip_sequence(tolerance, solid):
     print('proximity done')
     time.sleep(0.5)
 
+def grip_sequence_with_force(tol_force_N):
+    pub_cmd_maincontroller = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+
+    # test to see hwo to send just one msg
+    while not rospy.is_shutdown():
+        connections = pub_cmd_maincontroller.get_num_connections()
+        print('snurring')
+        if connections > 0:
+            pub_cmd_maincontroller.publish('operate_gripper_release')
+            print('yay maincontroller sent a msg')
+            break
+        else:
+            time.sleep(0.1)
+
+    proximityLogic = proximityCalc.ProximityCalcClass()
+
+    while not proximityLogic.prox_check_force_condition(tol_force_N):
+        time.sleep(0.1)
+        proximityLogic.prox_check_force_condition(tol_force_N)
+        continue
+
+    print('proximity done')
+    time.sleep(0.5)
+
 '''
 Makes sure object doesn't slip, adjusts force and width to ensure not dropping it
 WARNING MAY CAUSE DAMAGE TO OBJECT BY GRIPPING TOO HARD
@@ -157,12 +181,19 @@ def stage_0():
     gripper_release()
     arm = armCalc.UR10_robot_arm()
     arm.move_position(0.0857, -0.7475, 0.0401, np.pi/2, 0, 0)
-    while not arm.is_at_position(0.0857, -0.7475, 0.0331, np.pi/2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(0.0857, -0.7475, 0.0331, np.pi/2, 0, 0, 20, 0.1):
+        print('not at pos stage 0')
         continue
+
+    x = arm.xTranslation
+    y = arm.yTranslation
+    z = arm.zTranslation
     arm.move_gripper_forwards(55)
-    while not arm.is_at_position(0.0857, -0.7475 - 0.055, 0.0331, np.pi / 2, 0, 0, 10, 0.1):
+    while not arm.is_at_position(x, y - 0.055, z, np.pi / 2, 0, 0, 20, 0.1):
+        print('not at second pos stage 0')
         continue
-    grip_sequence(25, False)
+    #grip_sequence(25, False)
+    grip_sequence_with_force(1)
     print('stage0 complete')
     None
 
@@ -170,9 +201,9 @@ def stage_1():
     # lift and check slip
     #move to dropoff and check slip onn the way
     arm = armCalc.UR10_robot_arm()
-
+    Z = arm.zTranslation
     arm.move_gripper_up(100)
-    while not arm.is_at_position(0.0857, -0.7475 - 0.055, 0.0401 + 0.1, np.pi / 2, 0, 0, 30, 0.5):
+    while not arm.is_at_position(0.0857, -0.7475 - 0.055, Z+ 0.1, np.pi / 2, 0, 0, 50, 0.5):
         print('not at pos yo')
         slip_check()
 
@@ -213,7 +244,7 @@ def stage_3():
     while not arm.is_at_position(0.2724, -0.7581 - 0.055, 0.0120, np.pi / 2, 0, 0, 10, 0.5):
         continue
 
-    grip_sequence(5, True)
+    grip_sequence_with_force(10)
     print('stage3 complete')
     None
 
@@ -267,16 +298,19 @@ def stage_6():
         print('not in pos')
         continue
 
-    grip_sequence(30, False)
+    grip_sequence_with_force(1)
     print('stage6 complete')
     None
 
 def stage_7():
     # lift and check slip, do what stage 1 does
     arm = armCalc.UR10_robot_arm()
+    x = arm.xTranslation
+    y = arm.yTranslation
+    z = arm.zTranslation
     arm.move_gripper_up(100)
 
-    while not arm.is_at_position(0.4472, -0.7139 - 0.095, 0.0638 + 0.1, np.pi / 2, 0, 0, 10, 0.5):
+    while not arm.is_at_position(x, y, z + 0.1, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     print('stage7 complete')

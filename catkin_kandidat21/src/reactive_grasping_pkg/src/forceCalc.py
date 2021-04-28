@@ -26,6 +26,7 @@ class ForceCalcClass:
         None
     '''
     def force_torque_data_handler(self, msg):
+
         self.current_msg = msg.data
 
     '''
@@ -126,6 +127,12 @@ class ForceCalcClass:
         self.current_msg = '[F_x_R=1,F_y_R=2,F_z_R=5,F_x_L=1,F_y_L=2,F_z_L=1]'
         rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
 
+        #wait for real values
+
+        while self.current_msg == '[F_x_R=1,F_y_R=2,F_z_R=5,F_x_L=1,F_y_L=2,F_z_L=1]':
+            continue
+
+        print('Found force values: FzL', self.get_F_z_L(), ' FzR', self.get_F_z_R())
 
 
 def main():
