@@ -132,12 +132,13 @@ class ProximityCalcClass:
                         step = 2
 
                         pub_cmd_proximitycalc.publish('operate_gripper_step_width(' + str(step) + ')')
+                        time1 = time.time()
                         print(self.get_width()/10)
 
 
-                        arm.depth_compensation_gripper((self.get_width()/10), (self.get_width()/10) - step)
+                        has_compensated = arm.depth_compensation_gripper((self.get_width()/10), (self.get_width()/10) - step)
 
-                        while not math.isclose(self.get_width()/10, old_width - step, abs_tol= 1):
+                        while not math.isclose(self.get_width()/10, old_width - step, abs_tol= 1) or not (has_compensated and time.time() - time1 > 0.5) :
                             continue
 
                         break

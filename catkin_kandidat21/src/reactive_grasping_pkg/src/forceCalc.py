@@ -112,7 +112,7 @@ class ForceCalcClass:
     '''
     def slip_react(self):
         # gripperInterface1.operate_gripper_step_force(0.1)
-        pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+        pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=1)
         # rospy.init_node('talkerdffdf', anonymous=True)
 
         while not rospy.is_shutdown():
@@ -121,6 +121,7 @@ class ForceCalcClass:
             if connections > 0:
                 pub_cmd_forcecalc.publish('operate_gripper_step_force(5)')
                 pub_cmd_forcecalc.publish('operate_gripper_step_width(1)')
+                break
 
         time.sleep(0.05)
 

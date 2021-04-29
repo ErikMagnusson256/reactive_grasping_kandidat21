@@ -256,11 +256,11 @@ def stage_4():
     z = arm.zTranslation
 
     arm.move_gripper_up(10)
-    while not arm.is_at_position(x, y, z + 0.01, np.pi / 2, 0, 0, 20, 0.5):
+    while not arm.is_at_position(x, y, z + 0.01, np.pi / 2, 0, 0, 5, 0.5):
         slip_check()
     time.sleep(3)
     arm.move_gripper_up(100)
-    while not arm.is_at_position(x, y, z + 0.1, np.pi / 2, 0, 0, 20, 0.5):
+    while not arm.is_at_position(x, y, z + 0.1, np.pi / 2, 0, 0, 5, 0.5):
         slip_check()
 
     print('stage4 complete')
@@ -272,7 +272,7 @@ def stage_5():
     arm.move_position(-0.6044, -0.8730, 0.0277, np.pi/2, 0, 0)
 
 
-    while not arm.is_at_position(-0.6044, -0.8730, 0.0277 - 0.01, np.pi / 2, 0, 0, 10, 0.5):
+    while not arm.is_at_position(-0.6044, -0.8730, 0.0277 - 0.03, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     gripper_release()
@@ -326,7 +326,7 @@ def stage_8():
     arm = armCalc.UR10_robot_arm()
     arm.move_position(-0.6044, -0.8730, 0.0638, np.pi/2, 0, 0)
 
-    while not arm.is_at_position(-0.6044, -0.8730, 0.0638 + 0.015, np.pi / 2, 0, 0, 10, 0.5):
+    while not arm.is_at_position(-0.6044, -0.8730, 0.0638 + 0.03, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     gripper_release()
@@ -351,9 +351,9 @@ if __name__ == '__main__':
     This sequence tries to grip three types of objects at an approximate position and drops them off at a known location
     The approximate position allows our controlling algorithms to make final small adjustments to grasp the object
     '''
-    stage_0() #moves to the cup position and positions the fingers approximatly around the cup, gripps the cup
-    stage_1() #moves the cup up 100 mm,checks for slip and adjusts
-    stage_2() #drops off the cup at dropoff position, checks for slip and adjusts while moving
+    #stage_0() #moves to the cup position and positions the fingers approximatly around the cup, gripps the cup
+    #stage_1() #moves the cup up 100 mm,checks for slip and adjusts
+    #stage_2() #drops off the cup at dropoff position, checks for slip and adjusts while moving
     stage_3() #moves to the approximate weight position, places the fingers roughly around the object, makes small adjustments and grips the weight
     stage_4() #moves the weight up 100 mm,checks for slip and adjusts
     stage_5() #drops off the weight dropoff position, checks for slip and adjusts while moving

@@ -339,7 +339,7 @@ class UR10_robot_arm:
 
         self.execute_movel_cmd(self.xTranslation, self.yTranslation + current_depth_mm*0.001 - target_depth_mm*0.001, self.zTranslation, self.Rx, self.Ry, self.Rz)
 
-        None
+        return True
 
     '''
     Executes a movel command to the robot by sending an movel command in urscript wich is then interpret by the robot

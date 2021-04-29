@@ -215,9 +215,10 @@ class Rg2ftModbusROSInterface:
         while not rospy.is_shutdown():
             time1 = time.time()
 
-            #skips this iteration
-            #while self.write_cmd_prio:
-             #   continue
+            #check if there has been a new cmd to gripper
+            if self.has_stored_cmd and self.cmd_string != None:
+                self.gripper_cmd_execution()
+                self.has_stored_cmd = False
 
             #waits for the gripper to execute commands before starting to read data
             while self.is_writing_registers and not self.is_reading_registers:
@@ -277,39 +278,44 @@ class Rg2ftModbusROSInterface:
         None
     '''
     def gripper_cmd_handler(self, msg):
-        cmd_string = msg.data
+        self.cmd_string = msg.data
+        self.has_stored_cmd = True
+
+    def gripper_cmd_execution(self):
+
+
         # check what type of cmd that has been sent, see function method to see examples of allowable
         self.write_cmd_prio = True
-        if 'operate_gripper(' in cmd_string:
-            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string,': operating gripper executing')
-            width = int(cmd_string.split('(')[1].split(',')[0])
-            force = int(cmd_string.split(',')[1].split(')')[0])
+        if 'operate_gripper(' in self.cmd_string :
+            print('Command recived from topic /gripper_interface/gripper_cmd:', self.cmd_string ,': operating gripper executing')
+            width = int(self.cmd_string .split('(')[1].split(',')[0])
+            force = int(self.cmd_string .split(',')[1].split(')')[0])
 
             print('width', width, ' force', force)
             self.operate_gripper(width,force)
             print('done operate gripper')
 
-        elif 'operate_gripper_step_width(' in cmd_string:
-            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string, ': operating_gripper_step_width executing')
-            step_width = int(cmd_string.split('(')[1].split(')')[0])
+        elif 'operate_gripper_step_width(' in self.cmd_string :
+            print('Command recived from topic /gripper_interface/gripper_cmd:', self.cmd_string , ': operating_gripper_step_width executing')
+            step_width = int(self.cmd_string .split('(')[1].split(')')[0])
             print('step_width:',step_width)
             self.operate_gripper_step_width(step_width)
             print('done step width')
 
-        elif 'operate_gripper_step_force(' in cmd_string:
-            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string, ': operating_gripper_step_force executing')
-            step_force = int(cmd_string.split('(')[1].split(')')[0])
+        elif 'operate_gripper_step_force(' in self.cmd_string :
+            print('Command recived from topic /gripper_interface/gripper_cmd:', self.cmd_string , ': operating_gripper_step_force executing')
+            step_force = int(self.cmd_string .split('(')[1].split(')')[0])
             print('step_force:', step_force)
             self.operate_gripper_step_force(step_force)
             print('done step force')
 
-        elif 'operate_gripper_release' in cmd_string:
-            print('Command recived from topic /gripper_interface/gripper_cmd:', cmd_string, ': operate_gripper_release executing')
+        elif 'operate_gripper_release' in self.cmd_string :
+            print('Command recived from topic /gripper_interface/gripper_cmd:', self.cmd_string , ': operate_gripper_release executing')
             self.opeate_grippper_release()
             print('done release')
 
         else:
-            print("Unknown command recived on /gripper_interface/gripper_cmd/ :", cmd_string)
+            print("Unknown command recived on /gripper_interface/gripper_cmd/ :", self.cmd_string )
 
         self.write_cmd_prio = False
 
@@ -361,8 +367,8 @@ class Rg2ftModbusROSInterface:
            None
        '''
     def opeate_grippper_release(self):
-        self.operate_gripper(100, 40)
-        self.current_force = 40
+        self.operate_gripper(100, 10)
+        self.current_force = 10
         return True
 
     '''
@@ -447,6 +453,8 @@ class Rg2ftModbusROSInterface:
     def __init__(self):
         self.wanted_hz = 20
         self.current_force = 3
+        self.cmd_string = None
+        self.has_stored_cmd = False
 
         box_ip = "192.168.1.1"  # OnRobot computebox IP address
         self.client = ModbusClient(box_ip, port=502)  # Creates a client in this program that uses the box ip and port 502 (as per standard for modbus)
