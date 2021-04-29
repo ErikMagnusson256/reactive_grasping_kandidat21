@@ -114,8 +114,14 @@ class ForceCalcClass:
         # gripperInterface1.operate_gripper_step_force(0.1)
         pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
         # rospy.init_node('talkerdffdf', anonymous=True)
-        pub_cmd_forcecalc.publish('operate_gripper_step_force(5)')
-        pub_cmd_forcecalc.publish('operate_gripper_step_width(5)')
+
+        while not rospy.is_shutdown():
+            connections = pub_cmd_forcecalc.get_num_connections()
+            print('watiing for connecting in forcecalc check slip react')
+            if connections > 0:
+                pub_cmd_forcecalc.publish('operate_gripper_step_force(5)')
+                pub_cmd_forcecalc.publish('operate_gripper_step_width(1)')
+
         time.sleep(0.05)
 
     '''

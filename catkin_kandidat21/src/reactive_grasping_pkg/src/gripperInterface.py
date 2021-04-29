@@ -220,7 +220,7 @@ class Rg2ftModbusROSInterface:
              #   continue
 
             #waits for the gripper to execute commands before starting to read data
-            while self.is_writing_registers:
+            while self.is_writing_registers and not self.is_reading_registers:
                 continue
 
             # icurrently reading data from registers, don't want to accidentaly write to them at the same time
@@ -312,6 +312,9 @@ class Rg2ftModbusROSInterface:
             print("Unknown command recived on /gripper_interface/gripper_cmd/ :", cmd_string)
 
         self.write_cmd_prio = False
+
+
+
     '''
     Reads the current width and calculates new width for gripper to close it by a set step amount
     Calls operate_gripper( , ) to actuate the gripper with calculated width and with same force as last time it gripped
@@ -341,6 +344,8 @@ class Rg2ftModbusROSInterface:
     def operate_gripper_step_force(self, increment_force_N):
         current_width = self.get_current_width()/10
         self.current_force = self.current_force + increment_force_N
+        if self.current_force > 40:
+            self.current_force = 40
 
         self.operate_gripper(current_width, (self.current_force))
 
@@ -440,11 +445,11 @@ class Rg2ftModbusROSInterface:
         None
     '''
     def __init__(self):
-        self.wanted_hz = 40
+        self.wanted_hz = 20
         self.current_force = 3
 
         box_ip = "192.168.1.1"  # OnRobot computebox IP address
-        self.client = ModbusClient(box_ip, port=502, timeout=0.5)  # Creates a client in this program that uses the box ip and port 502 (as per standard for modbus)
+        self.client = ModbusClient(box_ip, port=502)  # Creates a client in this program that uses the box ip and port 502 (as per standard for modbus)
         return_val = self.client.connect()  # Tries to connect to the computebox
         print("Established connection to compute box?: ", return_val)  # prints in console if a connection is established
 

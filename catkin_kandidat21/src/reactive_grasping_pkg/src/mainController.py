@@ -272,7 +272,7 @@ def stage_5():
     arm.move_position(-0.6044, -0.8730, 0.0277, np.pi/2, 0, 0)
 
 
-    while not arm.is_at_position(-0.6044, -0.8730, 0.0277, np.pi / 2, 0, 0, 10, 0.5):
+    while not arm.is_at_position(-0.6044, -0.8730, 0.0277 - 0.01, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     gripper_release()
@@ -288,14 +288,19 @@ def stage_6():
     # go to trä, do stage 3
     arm = armCalc.UR10_robot_arm()
     arm.move_position(0.4472, -0.7139, 0.0638, np.pi / 2, 0, 0)
-    while not arm.is_at_position(0.4472, -0.7139, 0.0638, np.pi / 2, 0, 0, 10, 0.5):
+    while not arm.is_at_position(0.4472, -0.7139, 0.0638, np.pi / 2, 0, 0, 20, 0.5):
+        print('not at pos stage 6')
         continue
 
 
+    arm.read_gripper_translation_rotation()
+    x = arm.xTranslation
+    y = arm.yTranslation
+    z = arm.zTranslation
     arm.move_gripper_forwards(95)
 
-    while not arm.is_at_position(0.4472, -0.7139 - 0.095, 0.0638, np.pi / 2, 0, 0, 10, 0.5):
-        print('not in pos')
+    while not arm.is_at_position(x, y - 0.095, z, np.pi / 2, 0, 0, 10, 0.5):
+        print('not in pos stage 6 - 2')
         continue
 
     grip_sequence_with_force(1)
@@ -321,7 +326,7 @@ def stage_8():
     arm = armCalc.UR10_robot_arm()
     arm.move_position(-0.6044, -0.8730, 0.0638, np.pi/2, 0, 0)
 
-    while not arm.is_at_position(-0.6044, -0.8730, 0.0638, np.pi / 2, 0, 0, 10, 0.5):
+    while not arm.is_at_position(-0.6044, -0.8730, 0.0638 + 0.015, np.pi / 2, 0, 0, 10, 0.5):
         slip_check()
 
     gripper_release()
