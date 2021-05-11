@@ -84,12 +84,16 @@ class ForceCalcClass:
         None
     '''
     def slip_detect(self):
-        #rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
-        if (np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)) > abs((self.get_F_z_L() * 0.5))) or (
-                np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)) > abs((self.get_F_z_R() * 0.5))):
+
+        if (np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)) >
+            abs((self.get_F_z_L() * 0.5))) or (
+                np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)) >
+                abs((self.get_F_z_R() * 0.5))):
             print('Caught me slipping')
-            print(np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)), '>', (self.get_F_z_L() * 0.5))
-            print(np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)), '>', (self.get_F_z_R() * 0.5))
+            print(np.sqrt((self.get_F_x_L() ** 2) + (self.get_F_y_L() ** 2)),
+                  '>', (self.get_F_z_L() * 0.5))
+            print(np.sqrt((self.get_F_x_R() ** 2) + (self.get_F_y_R() ** 2)),
+                  '>', (self.get_F_z_R() * 0.5))
             self.slip_react()
             time.sleep(0.1)
             return True
@@ -99,7 +103,8 @@ class ForceCalcClass:
     '''
     TODO fix send single msg
     
-    Function that reacts to slip by increasing gripping force and decreasing gripper width
+    Function that reacts to slip by increasing gripping force and decreasing 
+    gripper width
     Createsa publisher to send cmd
     then sends cmd to actuate gripper
     
@@ -112,7 +117,8 @@ class ForceCalcClass:
     '''
     def slip_react(self):
         # gripperInterface1.operate_gripper_step_force(0.1)
-        pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=1)
+        pub_cmd_forcecalc = rospy.Publisher('/gripper_interface/gripper_cmd/',
+                                            String, queue_size=1)
         # rospy.init_node('talkerdffdf', anonymous=True)
 
         while not rospy.is_shutdown():
@@ -132,7 +138,8 @@ class ForceCalcClass:
     '''
     def __init__(self):
         self.current_msg = '[F_x_R=1,F_y_R=2,F_z_R=5,F_x_L=1,F_y_L=2,F_z_L=1]'
-        rospy.Subscriber('/gripper_interface/force_torque_data/', String, self.force_torque_data_handler)
+        rospy.Subscriber('/gripper_interface/force_torque_data/', String,
+                         self.force_torque_data_handler)
 
         #wait for real values
 

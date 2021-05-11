@@ -15,7 +15,8 @@ from forceCalc import ForceCalcClass
 
 
 '''
-Class with helper function to handle proximity logic when starting a grasp sequence
+Class with helper functions to handle proximity 
+logic when starting a grasp sequence
 '''
 class ProximityCalcClass:
     '''
@@ -110,46 +111,60 @@ class ProximityCalcClass:
 
 
 
-        pub_cmd_proximitycalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+        pub_cmd_proximitycalc = rospy.Publisher('/gripper_interface/gripper_cmd/',
+                                                String, queue_size=10)
         # rospy.init_node('talkerdffdf', anonymous=True)
-        # Run gripping command from main? or just return a "good" status, start closing grippers and then run proxCheck()
-        # again once fingers are closer to object? interesting if we could with this grip a moving object?
-        if math.isclose(self.get_prox_L(), self.get_prox_R(), abs_tol=self.tolerance_mm):
-            print('FORCE L R : ', forceLogic.get_F_z_L()/-10, forceLogic.get_F_z_R()/10, ' real values: ', forceLogic.get_F_z_L(), forceLogic.get_F_z_R())
-            if abs(forceLogic.get_F_z_R()/10) > tol_force_N and abs(forceLogic.get_F_z_L()/10) > tol_force_N:
-                return True, print('Yay!', self.get_prox_L(), self.get_prox_R())  # ???
+        # Run gripping command from main? or just return a "good" status,
+        # start closing grippers and then run proxCheck()
+
+        if math.isclose(self.get_prox_L(), self.get_prox_R(),
+                        abs_tol=self.tolerance_mm):
+            print('FORCE L R : ', forceLogic.get_F_z_L()/-10,
+                  forceLogic.get_F_z_R()/10,
+                  ' real values: ', forceLogic.get_F_z_L(), forceLogic.get_F_z_R())
+
+            if abs(forceLogic.get_F_z_R()/10) > tol_force_N and \
+                    abs(forceLogic.get_F_z_L()/10) > tol_force_N:
+                return True, print('Yay!', self.get_prox_L(), self.get_prox_R())
             else:
-                print('L', self.get_prox_L(), ' R', self.get_prox_R(), 'FzR', forceLogic.get_F_z_R(), 'FzL', forceLogic.get_F_z_L())
+                print('L', self.get_prox_L(), ' R', self.get_prox_R(),
+                      'FzR', forceLogic.get_F_z_R(), 'FzL', forceLogic.get_F_z_L())
 
                 while not rospy.is_shutdown():
                     connections = pub_cmd_proximitycalc.get_num_connections()
                     print('watiing for connecting in prox check force')
                     if connections > 0:
-                        # target_width = 100 - self.get_prox_R() - self.get_prox_L() - self.tolerance_mm
-                        # if target_width < 0:
-                        #    target_width = 2
+
                         old_width = int(self.get_width()/10)
                         step = 2
 
-                        pub_cmd_proximitycalc.publish('operate_gripper_step_width(' + str(step) + ')')
+                        pub_cmd_proximitycalc.publish('operate_gripper_step_width('
+                                                      + str(step) + ')')
                         time1 = time.time()
                         print(self.get_width()/10)
 
 
-                        has_compensated = arm.depth_compensation_gripper((self.get_width()/10), (self.get_width()/10) - step)
+                        has_compensated = arm.depth_compensation_gripper(
+                            (self.get_width()/10), (self.get_width()/10) - step)
 
-                        while not math.isclose(self.get_width()/10, old_width - step, abs_tol= 1) or not (has_compensated and time.time() - time1 > 0.5) :
+                        while not math.isclose(self.get_width()/10,
+                                               old_width - step, abs_tol= 1) \
+                                or not (has_compensated and time.time() - time1 > 0.5):
                             continue
 
                         break
                     else:
                         time.sleep(0.1)
 
-        # If distance from finger L + tolerance is larger than the distance from finger R, this mean we need to move
-        #    the arm in the direction of finger R. Standing on the "robots side", the finger marked as R is on the left,
-        # sooo this means we need to decide from what perspective we are counting from.
+        # If distance from finger L + tolerance is larger than the distance
+        # from finger R, this mean we need to move the arm in the direction
+        # of finger R. Standing on the "robots side", the finger marked as
+        # R is on the left,so this means we need to decide from what perspective
+        # we are counting
+        # from.
         elif (self.get_prox_L() - self.tolerance_mm) > self.get_prox_R():
-            # Move gripper towards finger R by tiny amount depending on Hz? SLOWLY! send this to armCalc
+            # Move gripper towards finger R by tiny amount
+            # SLOWLY! send this to armCalc
             print('1')
             arm.move_gripper_L(2)
             time.sleep(0.75)
@@ -171,22 +186,27 @@ class ProximityCalcClass:
         arm = armCalc.UR10_robot_arm()
         forceLogic = ForceCalcClass()
 
-        pub_cmd_proximitycalc = rospy.Publisher('/gripper_interface/gripper_cmd/', String, queue_size=10)
+        pub_cmd_proximitycalc = rospy.Publisher('/gripper_interface/gripper_cmd/',
+                                                String, queue_size=10)
         #rospy.init_node('talkerdffdf', anonymous=True)
-        # Run gripping command from main? or just return a "good" status, start closing grippers and then run proxCheck()
-        # again once fingers are closer to object? interesting if we could with this grip a moving object?
-        if math.isclose(self.get_prox_L(), self.get_prox_R(), abs_tol=self.tolerance_mm):
+        # Run gripping command from main? or just return a "good" status, start
+        # closing grippers and then run proxCheck()
+        # again once fingers are closer to object? interesting if we could with
+        # this grip a moving object?
+        if math.isclose(self.get_prox_L(), self.get_prox_R(),
+                        abs_tol=self.tolerance_mm):
             if solid:
                 while not rospy.is_shutdown():
                     connections = pub_cmd_proximitycalc.get_num_connections()
                     if connections > 0:
-                        # target_width = 100 - self.get_prox_R() - self.get_prox_L() - self.tolerance_mm
-                        # if target_width < 0:
-                        #    target_width = 2
+
                         step = 2
-                        pub_cmd_proximitycalc.publish('operate_gripper(' + str(int(self.get_width()) -step) +', 40)')
+                        pub_cmd_proximitycalc.publish(
+                            'operate_gripper(' + str(int(self.get_width()) -step) +
+                            ', 40)')
                         print(self.get_width())
-                        arm.depth_compensation_gripper(self.get_width(), int(self.get_width()) - step)
+                        arm.depth_compensation_gripper(
+                            self.get_width(), int(self.get_width()) - step)
                         time.sleep(0.5)
                         break
                     else:
@@ -194,32 +214,35 @@ class ProximityCalcClass:
                     if forceLogic.get_F_z_L() > 10 and forceLogic.get_F_z_R() >10:
                        return True, print('solid grip!')
 
-            if math.isclose(self.get_prox_L(), 0, abs_tol=tolerance) and math.isclose(self.get_prox_R(), 0,
-                                                                                       abs_tol=tolerance):
-                return True, print('Yay!', self.get_prox_L(), self.get_prox_R())  # ???
+            if math.isclose(self.get_prox_L(), 0, abs_tol=tolerance) and \
+                    math.isclose(self.get_prox_R(), 0, abs_tol=tolerance):
+                return True, print('Yay!', self.get_prox_L(), self.get_prox_R())
             else:
                 print('L', self.get_prox_L(), ' R', self.get_prox_R())
 
                 while not rospy.is_shutdown():
                     connections = pub_cmd_proximitycalc.get_num_connections()
                     if connections > 0:
-                        #target_width = 100 - self.get_prox_R() - self.get_prox_L() - self.tolerance_mm
-                        #if target_width < 0:
-                        #    target_width = 2
+
                         step = 2
-                        pub_cmd_proximitycalc.publish('operate_gripper_step_width(' + str(step)+')')
+                        pub_cmd_proximitycalc.publish(
+                            'operate_gripper_step_width(' + str(step)+')')
                         print(self.get_width())
-                        arm.depth_compensation_gripper((self.get_width()), (self.get_width()) - step)
+                        arm.depth_compensation_gripper(
+                            (self.get_width()), (self.get_width()) - step)
                         time.sleep(0.5)
                         break
                     else:
                         time.sleep(0.1)
 
-        # If distance from finger L + tolerance is larger than the distance from finger R, this mean we need to move
-    #    the arm in the direction of finger R. Standing on the "robots side", the finger marked as R is on the left,
-        # sooo this means we need to decide from what perspective we are counting from.
+        # If distance from finger L + tolerance is larger than the distance from
+        # finger R, this mean we need to move the arm in the direction of finger R.
+        # Standing on the "robots side", the finger marked as R is on the left,
+        # sooo this means we need to decide from what perspective we are counting
+        # from.
         elif (self.get_prox_L() - self.tolerance_mm)> self.get_prox_R():
-            # Move gripper towards finger R by tiny amount depending on Hz? SLOWLY! send this to armCalc
+            # Move gripper towards finger R by tiny amount
+            # SLOWLY! send this to armCalc
             print('1')
             arm.move_gripper_L(2)
             time.sleep(0.75)
@@ -246,8 +269,10 @@ class ProximityCalcClass:
     def __init__(self):
         self.current_msg = '[proximity_value_R=300,proximity_value_L=550]'
         self.tolerance_mm = 40
-        self.proximity_sub = rospy.Subscriber('/gripper_interface/proximity_data/', String, self.prox_data_handler)
-        self.width_sub = rospy.Subscriber('/gripper_interface/gripper_width', String, self.width_data_handler)
+        self.proximity_sub = rospy.Subscriber('/gripper_interface/proximity_data/',
+                                              String, self.prox_data_handler)
+        self.width_sub = rospy.Subscriber('/gripper_interface/gripper_width',
+                                          String, self.width_data_handler)
 
 def main():
 
